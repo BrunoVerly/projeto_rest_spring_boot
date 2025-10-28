@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: projeto_rest_spring_boot
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/projeto_spring_a3?useTimezone=true&serverTimezone=UTC
+    username: root
+    password: S@Jr%ilh%754vV
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+    show-sql: false
+    open-in-view: false
+logging:
+  level:
+    root: WARN
+
