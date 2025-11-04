@@ -1,0 +1,29 @@
+cors:
+  origins:
+    patterns: http://localhost:8080,http://localhost:3000,https://www.example.com
+spring:
+  application:
+    name: projeto_rest_spring_boot
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://azuremysqlbruno.mysql.database.azure.com/projeto_rest_spring_boot?useTimezone=true&serverTimezone=UTC
+    username: master
+    password: bJb%2up0vHcSE^
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+    show-sql: false
+    open-in-view: false
+logging:
+  level:
+    root: WARN
+
+  spring-doc:
+    paths-to-match: /api/**/v1/**
+    swagger-ui:
+      use-root-path: true
+
+
+

@@ -1,0 +1,28 @@
+server:
+  port: 8888
+cors:
+  origins:
+    patterns: http://localhost:8080,http://localhost:3000,https://www.example.com
+spring:
+  application:
+    name: projeto_rest_spring_boot
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+    show-sql: false
+    open-in-view: false
+logging:
+  level:
+    root: WARN
+
+  spring-doc:
+    paths-to-match: /api/**/v1/**
+    swagger-ui:
+      use-root-path: true
+
+
+
