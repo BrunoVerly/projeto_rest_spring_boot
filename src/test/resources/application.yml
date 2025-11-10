@@ -1,5 +1,10 @@
 server:
   port: 8888
+file:
+ upload-dir: /home/bverly/Downloads/downloads_projeto_spring
+email:
+  subject: "Default Subject"
+  message: "Default Message"
 cors:
   origins:
     patterns: http://localhost:8080,http://localhost:3000,https://www.example.com
@@ -15,6 +20,21 @@ spring:
       hibernate:
     show-sql: false
     open-in-view: false
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${EMAIL_USERNAME}
+    password: ${EMAIL_PASSWORD}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+      mail.smtp.starttls.required: true
+  servlet:
+    multipart:
+      enabled: true
+      file-size-threshold: 2KB
+      max-file-size: 200MB
+      max-request-size: 200MB
 logging:
   level:
     root: WARN
