@@ -8,8 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface EmailControllerDocs {
-    @Operation(summary = "Send and e-mail",
-            description = "Send an e-mail without attachment",
+    @Operation(summary = "Enviar e-mail",
+            description = "Endpoint para o envio de e-mails simples",
             tags = {"e-Mail"},
             responses = {
                     @ApiResponse(description = "Success", responseCode = "200", content = @Content),
@@ -20,8 +20,8 @@ public interface EmailControllerDocs {
 
     ResponseEntity<String> sendEmail(EmailRequestDTO emailRequestDTO);
 
-    @Operation(summary = "Send and e-mail with attachment",
-            description = "Send an e-mail with attachment",
+    @Operation(summary = "Enviar e-mail com anexo",
+            description = "Endpoint para o envio de e-mails com anexo",
             tags = {"e-Mail"},
             responses = {
                     @ApiResponse(description = "Success", responseCode = "200", content = @Content),

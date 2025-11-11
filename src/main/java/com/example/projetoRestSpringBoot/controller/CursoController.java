@@ -2,6 +2,7 @@ package com.example.projetoRestSpringBoot.controller;
 
 import com.example.projetoRestSpringBoot.controller.docs.CursoControllerDocs;
 import com.example.projetoRestSpringBoot.dto.CursoDTO;
+import com.example.projetoRestSpringBoot.dto.FuncionarioDTO;
 import com.example.projetoRestSpringBoot.file.exporter.MediaTypes;
 import com.example.projetoRestSpringBoot.model.Curso;
 import com.example.projetoRestSpringBoot.services.CursoService;
@@ -20,6 +21,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/curso/v1")
@@ -41,6 +45,19 @@ public class CursoController implements CursoControllerDocs {
         return ResponseEntity.ok(service.findAll(pageable));
     }
 
+    @GetMapping(value = "/buscarPorNome/{nome}", produces = {MediaType.APPLICATION_JSON_VALUE,
+            MediaType.APPLICATION_XML_VALUE,
+            MediaType.APPLICATION_YAML_VALUE})
+    public ResponseEntity<PagedModel<EntityModel<CursoDTO>>> findByName(
+            @PathVariable("nome") String nome,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "direction", defaultValue = "asc") String direction
+    ) {
+        var sortDirection = "desc".equalsIgnoreCase(direction) ? Direction.DESC : Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, "nome"));
+        return ResponseEntity.ok(service.findByName(nome, pageable));
+    }
 
     @GetMapping(value = "/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_YAML_VALUE})
     @Override
@@ -58,6 +75,7 @@ public class CursoController implements CursoControllerDocs {
                     MediaType.APPLICATION_YAML_VALUE})
     @Override
     public Curso create (@RequestBody Curso curso) {
+
         return service.create(curso);
     }
 
@@ -111,5 +129,14 @@ public class CursoController implements CursoControllerDocs {
                 .contentType(MediaType.parseMediaType(contentType))
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
                 .body(file);
+    }
+    @PostMapping(value="/importar",
+            produces = {
+                    MediaType.APPLICATION_JSON_VALUE,
+                    MediaType.APPLICATION_XML_VALUE,
+                    MediaType.APPLICATION_YAML_VALUE})
+    //@Override
+    public List<CursoDTO> importarCursos (@RequestParam ("file") MultipartFile file) {
+        return service.importarArquivo(file);
     }
 }

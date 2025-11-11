@@ -7,12 +7,14 @@ import com.example.projetoRestSpringBoot.dto.CredencialDTO;
 import com.example.projetoRestSpringBoot.dto.FuncionarioDTO;
 import com.example.projetoRestSpringBoot.enums.CredencialStatus;
 import com.example.projetoRestSpringBoot.enums.FuncionarioSituacao;
+import com.example.projetoRestSpringBoot.enums.TreinamentoStatus;
 import com.example.projetoRestSpringBoot.exception.RequiredObjectIsNullException;
 import com.example.projetoRestSpringBoot.exception.ResourceNotFoundException;
 import com.example.projetoRestSpringBoot.file.exporter.contract.FileExporter;
 import com.example.projetoRestSpringBoot.file.exporter.factory.FileExporterFactory;
 import com.example.projetoRestSpringBoot.model.Credencial;
 import com.example.projetoRestSpringBoot.model.Funcionario;
+import com.example.projetoRestSpringBoot.model.Treinamento;
 import com.example.projetoRestSpringBoot.repository.CredencialRepository;
 import com.example.projetoRestSpringBoot.repository.FuncionarioRepository;
 
@@ -27,9 +29,11 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static com.example.projetoRestSpringBoot.mapper.ObjectMapper.parseObject;
@@ -293,12 +297,33 @@ public class CredencialService {
 
 
     private static void addHateosLinks(CredencialDTO dto) {
+        dto.add(linkTo(methodOn(CredencialController.class).findAll(0, 12, "asc")).withRel("findAll").withType("GET"));
         dto.add(linkTo(methodOn(CredencialController.class).findById(dto.getId())).withSelfRel().withType("GET"));
         dto.add(linkTo(methodOn(CredencialController.class).delete(dto.getId())).withRel("delete").withType("GET"));
         dto.add(linkTo(methodOn(CredencialController.class).create(parseObject(dto, Credencial.class))).withRel("create").withType("POST"));
         dto.add(linkTo(methodOn(CredencialController.class).update(dto)).withRel("update").withType("PUT"));
-        dto.add(linkTo(methodOn(CursoController.class).exportPage(1, 12, "asc", null)).withRel("exportPage").withType("GET"));
-        //dto.add(linkTo(methodOn(CredencialController.class).findByName("",1, 12, "asc")).withRel("findByName").withType("GET"));
+        dto.add(linkTo(methodOn(CredencialController.class).findByStatus(dto.getStatus(), 0, 12, "asc")).withRel("status").withType("GET"));
+        dto.add(linkTo(methodOn(CredencialController.class).exportPage(1, 12, "asc", null)).withRel("exportPage").withType("GET"));
+    }
+
+    private CredencialStatus calcularStatus(LocalDate dataVencimento) {
+        LocalDate hoje = LocalDate.now();
+        if (hoje.isAfter(dataVencimento)) {
+            return CredencialStatus.VENCIDA;
+        } else if (hoje.plusDays(90).isAfter(dataVencimento)) {
+            return CredencialStatus.VENCIMENTO_PROXIMO;
+        } else {
+            return CredencialStatus.VALIDA;
+        }
+    }
+
+    @Scheduled(cron = "0 0 0 * * ?") // todo dia à meia-noite
+    public void atualizarStatusCredenciais() {
+        List<Credencial> credenciais = repository.findAll();
+        for (Credencial c : credenciais) {
+            c.setStatus(calcularStatus(c.getDataVencimento()));
+        }
+        repository.saveAll(credenciais);
     }
 
 }

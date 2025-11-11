@@ -62,6 +62,9 @@ public class CredencialController implements CredencialControllerDocs {
     public Credencial create (@RequestBody Credencial credencial) {
         return service.create(credencial);
     }
+
+
+
     @GetMapping(value = "/buscarPorStatus/{status}", produces = {MediaType.APPLICATION_JSON_VALUE,
             MediaType.APPLICATION_XML_VALUE,
             MediaType.APPLICATION_YAML_VALUE})
@@ -76,6 +79,8 @@ public class CredencialController implements CredencialControllerDocs {
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, "dataVencimento"));
         return ResponseEntity.ok(service.findByStatus(status, pageable));
     }
+
+
     @GetMapping(value = "/buscarPorVencimento",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_YAML_VALUE})

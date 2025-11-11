@@ -49,7 +49,7 @@ public class CursoService {
     FileImporterFactory importer;
     @Autowired
     FileExporterFactory exporter;
-    
+
     @Autowired(required = false)
     PagedResourcesAssembler<CursoDTO> assembler;
 
@@ -91,6 +91,25 @@ public class CursoService {
         var dto = parseObject(repository.save(entity), CursoDTO.class);
         addHateosLinks(dto);
         return repository.save(entity);
+    }
+
+    public PagedModel<EntityModel<CursoDTO>> findByName(String nome, Pageable pageable) {
+        logger.info(String.format("Procurando curso(s) pelo nome"));
+
+        var cursos = repository.findCursoByName(nome, pageable);
+        var cursosLink = cursos.map(dto -> {
+            var curso = parseObject(dto, CursoDTO.class);
+            addHateosLinks(curso);
+            return curso;
+        });
+        Link findAllLink = WebMvcLinkBuilder.linkTo(
+                methodOn(CursoController.class).findAll(
+                        pageable.getPageNumber(),
+                        pageable.getPageSize(),
+                        String.valueOf(pageable.getSort())
+                )
+        ).withSelfRel();
+        return assembler.toModel(cursosLink, findAllLink);
     }
 
     public CursoDTO update(CursoDTO curso) {
@@ -139,13 +158,14 @@ public class CursoService {
     }
 
     private static void addHateosLinks(CursoDTO dto) {
+        dto.add(linkTo(methodOn(CursoController.class).findAll(0, 12, "asc")).withRel("findAll").withType("GET"));
         dto.add(linkTo(methodOn(CursoController.class).findById(dto.getId())).withSelfRel().withType("GET"));
         dto.add(linkTo(methodOn(CursoController.class).delete(dto.getId())).withRel("delete").withType("GET"));
         dto.add(linkTo(methodOn(CursoController.class).create(parseObject(dto, Curso.class))).withRel("create").withType("POST"));
         dto.add(linkTo(methodOn(CursoController.class).update(dto)).withRel("update").withType("PUT"));
         dto.add(linkTo(methodOn(CursoController.class)).slash("importarArquivo").withRel("importarArquivo").withType("POST"));
         dto.add(linkTo(methodOn(CursoController.class).exportPage(1, 12, "asc", null)).withRel("exportPage").withType("GET"));
-        //dto.add(linkTo(methodOn(CursoController.class).findByName("",1, 12, "asc")).withRel("findByName").withType("GET"));
+        dto.add(linkTo(methodOn(CursoController.class).findByName("",1, 12, "asc")).withRel("findByName").withType("GET"));
     }
 
     public List<CursoDTO> importarArquivo(MultipartFile file) {
@@ -169,7 +189,7 @@ public class CursoService {
                     })
                     .toList();
         } catch (Exception e) {
-            throw new FileStorageException("Erro ao ler o arquivo: " + e.getMessage());
+            throw new BadRequestException("Erro ao ler o arquivo: " + e.getMessage());
         }
     }
 

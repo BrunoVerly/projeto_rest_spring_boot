@@ -101,18 +101,17 @@ public class CsvExporter implements FileExporter {
             for(TreinamentoDTO treinamento : treinamentos){
                 csvPrinter.printRecord(
                         treinamento.getId(),
-                        treinamento.getFuncionarioId(),
-                        treinamento.getFuncionarioNome(),
-                        treinamento.getFuncionarioMatricula(),
-                        treinamento.getCursoId(),
-                        treinamento.getCursoNome(),
-                        treinamento.getDataAgendamento(),
-                        treinamento.getDataConcluido(),
-                        treinamento.getDataVencimento(),
-                        treinamento.getInstrutor(),
-                        treinamento.getStatus()
+                        treinamento.getFuncionarioId() != null ? treinamento.getFuncionarioId() : "",
+                        treinamento.getFuncionarioNome() != null ? treinamento.getFuncionarioNome() : "",
+                        treinamento.getFuncionarioMatricula() != null ? treinamento.getFuncionarioMatricula() : "",
+                        treinamento.getCursoId() != null ? treinamento.getCursoId() : "",
+                        treinamento.getCursoNome() != null ? treinamento.getCursoNome() : "",
+                        treinamento.getDataAgendamento() != null ? treinamento.getDataAgendamento() : "",
+                        treinamento.getDataConcluido() != null ? treinamento.getDataConcluido() : "",
+                        treinamento.getDataVencimento() != null ? treinamento.getDataVencimento() : "",
+                        treinamento.getInstrutor() != null ? treinamento.getInstrutor() : "",
+                        treinamento.getStatus() != null ? treinamento.getStatus() : ""
                 );
-
             }
         }
         return new ByteArrayResource(outputStream.toByteArray());

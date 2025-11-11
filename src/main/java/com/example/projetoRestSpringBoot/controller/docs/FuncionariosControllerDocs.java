@@ -2,6 +2,7 @@ package com.example.projetoRestSpringBoot.controller.docs;
 
 import com.example.projetoRestSpringBoot.dto.FuncionarioDTO;
 import com.example.projetoRestSpringBoot.enums.FuncionarioSituacao;
+import com.example.projetoRestSpringBoot.file.exporter.MediaTypes;
 import com.example.projetoRestSpringBoot.model.Funcionario;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -9,22 +10,24 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.core.io.Resource;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Map;
 
-@Tag(name = "Funcionarios", description = "Endpoints para gerenciamento dos funcionários")
+@Tag(name = "Funcionário", description = "Endpoints para gerenciamento de funcionário")
 public interface FuncionariosControllerDocs {
     @Operation(summary = "Buscar todos os funcionários",
-            description = "Endpoint para retornar uma lista paginada de todos os funcionários",
-            tags = {"Funcionarios"},
+            description = "Endpoint para retornar uma lista paginada com HATEOAS, de todos os funcionários",
             responses = {
                     @ApiResponse(
                             description = "Success",
@@ -48,9 +51,8 @@ public interface FuncionariosControllerDocs {
             @RequestParam(value = "direction", defaultValue = "asc") String direction
     );
 
-    @Operation(summary = "Buscar um funcionário pelo nome",
-            description = "Endpoint para retornar uma lista paginada de funcionários filtrados pelo nome",
-            tags = {"Funcionarios"},
+    @Operation(summary = "Buscar funcionários por nome",
+            description = "Endpoint para retornar uma lista paginada com HATEOAS, de funcionários filtrados pelo nome",
             responses = {
                     @ApiResponse(
                             description = "Success",
@@ -75,9 +77,8 @@ public interface FuncionariosControllerDocs {
                 @RequestParam(value = "direction", defaultValue = "asc") String direction
         );
 
-    @Operation(summary = "Buscar um funcionário pela situação",
-            description = "Endpoint para retornar uma lista paginada de funcionários filtrados pelo status da situação",
-            tags = {"Funcionarios"},
+    @Operation(summary = "Buscar funcionários por situação",
+            description = "Endpoint para retornar uma lista paginada com HATEOAS, de funcionários filtrados pelo status da situação",
             responses = {
                     @ApiResponse(
                             description = "Success",
@@ -102,9 +103,8 @@ public interface FuncionariosControllerDocs {
             @RequestParam(value = "direction", defaultValue = "asc") String direction
     );
 
-    @Operation(summary = "Buscar uma paginação de funcionários pela data de admissão",
-            description = "Endpoint para retornar uma lista paginada de funcionários filtrados pelo intervalo de datas de admissão",
-            tags = {"Funcionarios"},
+    @Operation(summary = "Buscar funcionários por intervalo de datas de admissão",
+            description = "Endpoint para retornar uma lista paginada com HATEOAS, de funcionários filtrados pela data de admissão",
             responses = {
                     @ApiResponse(
                             description = "Success",
@@ -130,9 +130,8 @@ public interface FuncionariosControllerDocs {
     );
 
 
-    @Operation(summary = "Buscar um funcionário pelo Id",
-            description = "Endpoint para retornar um funcionário especifico pelo Id",
-            tags = {"Funcionarios"},
+    @Operation(summary = "Buscar um funcionário pelo id",
+            description = "Endpoint para retornar um funcionário especifico filtrado pelo id",
             responses = {
                     @ApiResponse(
                             description = "Success",
@@ -149,8 +148,7 @@ public interface FuncionariosControllerDocs {
     FuncionarioDTO findById(@PathVariable("id") long id);
 
     @Operation(summary = "Buscar um funcionário pela matricula",
-            description = "Endpoint para retornar um funcionário especifico pela matricula",
-            tags = {"Funcionarios"},
+            description = "Endpoint para retornar um funcionário especifico filtrado pela matricula",
             responses = {
                     @ApiResponse(
                             description = "Success",
@@ -168,7 +166,6 @@ public interface FuncionariosControllerDocs {
 
     @Operation(summary = "Cadastrar um novo funcionário",
             description = "Endpoint para cadastrar um novo funcionário",
-            tags = {"Funcionarios"},
             responses = {
                     @ApiResponse(
                             description = "Success",
@@ -184,9 +181,8 @@ public interface FuncionariosControllerDocs {
             })
     Funcionario create(@RequestBody Funcionario funcionario);
 
-    @Operation(summary = "Atualizar um funcionário especifico",
-            description = "Endpoint para atualizar um funcionário especifico pelo Id",
-            tags = {"Funcionarios"},
+    @Operation(summary = "Atualizar um funcionário",
+            description = "Endpoint para atualizar um funcionário especificado filtrado pelo id",
             responses = {
                     @ApiResponse(
                             description = "Success",
@@ -202,9 +198,8 @@ public interface FuncionariosControllerDocs {
             })
     FuncionarioDTO update(@RequestBody FuncionarioDTO funcionario);
 
-    @Operation(summary = "Deletar um funcionário especifico",
-            description = "Endpoint para deletar um funcionário especifico pelo Id",
-            tags = {"Funcionarios"},
+    @Operation(summary = "Apagar um funcionário",
+            description = "Endpoint para apagar um funcionário especifico filtrado pelo id",
             responses = {
                     @ApiResponse(
                             description = "Success",
@@ -220,10 +215,8 @@ public interface FuncionariosControllerDocs {
             })
     ResponseEntity<?> delete(@PathVariable("id") long id);
 
-    /**
     @Operation(summary = "Criar vários funcionários por meio de upload de arquivo",
             description = "Endpoint para criar vários funcionários por meio de upload de arquivo em formatos CSV ou XLSX",
-            tags = {"Funcionarios"},
             responses = {
                     @ApiResponse(
                             description = "Success",
@@ -240,12 +233,10 @@ public interface FuncionariosControllerDocs {
                     @ApiResponse(description = "Not Found", responseCode = "404", content = @Content),
                     @ApiResponse(description = "Internal error", responseCode = "500", content = @Content),
             })
-    List <FuncionarioDTO> massCreation(MultipartFile file);
-    **/
-    /**
-    @Operation(summary = "Exportar todos os funcionarios",
-            description = "Endpoint para exportar uma lista paginada de todos os funcionarios em diferentes em CSV ou XLSX",
-            tags = {"Funcionarios"},
+    List<FuncionarioDTO> importarFuncionarios(MultipartFile file);
+
+    @Operation(summary = "Exportar funcionários",
+            description = "Endpoint para exportar o banco de funcionários em arquivos nos formatos CSV ou XLSX",
             responses = {
                     @ApiResponse(
                             description = "Success",
@@ -268,5 +259,4 @@ public interface FuncionariosControllerDocs {
             HttpServletRequest request
 
     );
-            **/
 }

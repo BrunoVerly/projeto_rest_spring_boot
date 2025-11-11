@@ -54,7 +54,7 @@ public class TreinamentoController implements TreinamentoControllerDocs {
     @GetMapping(value="/buscarPorStatus/{status}",produces = {MediaType.APPLICATION_JSON_VALUE,
             MediaType.APPLICATION_XML_VALUE,
             MediaType.APPLICATION_YAML_VALUE})
-    //@Override
+    @Override
     public ResponseEntity<PagedModel<EntityModel<TreinamentoDTO>>> findByStatus(
             @PathVariable(value = "status") TreinamentoStatus status,
             @RequestParam(value = "page", defaultValue = "0") int page,
@@ -161,7 +161,7 @@ public class TreinamentoController implements TreinamentoControllerDocs {
             MediaTypes.APPLICATION_XLSX_VALUE,
             MediaTypes.APPLICATION_TEXT_CSV_VALUE,
             MediaTypes.APPLICATION_PDF_VALUE})
-
+    @Override
     public ResponseEntity<Resource> exportPage(
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,

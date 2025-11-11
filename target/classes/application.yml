@@ -20,7 +20,7 @@ spring:
       write-dates-as-timestamps: false
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     properties:
       hibernate:
     show-sql: false
@@ -43,7 +43,7 @@ spring:
       max-request-size: 200MB
 logging:
   level:
-    root: WARN
+    root: DEBUG
 
 
   spring-doc:

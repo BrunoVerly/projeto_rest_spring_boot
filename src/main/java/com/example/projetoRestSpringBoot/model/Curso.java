@@ -22,7 +22,7 @@ public class Curso implements Serializable {
     @Column(nullable = false, length = 80)
     private String nome;
 
-    @Column(length = 200)
+    @Column(columnDefinition = "TEXT")
     private String descricao;
 
     @Column(name= "carga_horaria", nullable = false)

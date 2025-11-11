@@ -20,7 +20,7 @@ import java.util.List;
 @Component
 public class CsvImporter implements FileImporter {
     @Override
-    public List<FuncionarioDTO> importarFuncionarios(InputStream inputStream) throws Exception {
+    public List<Funcionario> importarFuncionarios(InputStream inputStream) throws Exception {
         CSVFormat csvFormat = CSVFormat.Builder.create()
                 .setHeader()
                 .setSkipHeaderRecord(true)
@@ -30,7 +30,7 @@ public class CsvImporter implements FileImporter {
 
         Iterable<CSVRecord> records = csvFormat.parse(new InputStreamReader(inputStream));
 
-        return parseRecordsToPersonDTOs(records);
+        return parseRecordsToFuncionario(records);
     }
 
     @Override
@@ -47,13 +47,16 @@ public class CsvImporter implements FileImporter {
         return parseRecordsToCursoDTOs(records);
     }
 
-    private List<FuncionarioDTO> parseRecordsToPersonDTOs(Iterable<CSVRecord> records) {
-        List<FuncionarioDTO> listaFuncionarios = new ArrayList<>();
+    private List<Funcionario> parseRecordsToFuncionario(Iterable<CSVRecord> records) {
+        List<Funcionario> listaFuncionarios = new ArrayList<>();
         for (CSVRecord record : records) {
-            FuncionarioDTO funcionario = new FuncionarioDTO();
+            Funcionario funcionario = new Funcionario();
             funcionario.setNome(record.get("nome"));
+            funcionario.setCpf(record.get("cpf"));
+            funcionario.setRg(record.get("rg"));
             funcionario.setMatricula(record.get("matricula"));
             funcionario.setCargo(record.get("cargo"));
+            funcionario.setDataNascimento(LocalDate.parse(record.get("dataNascimento")));
             funcionario.setDepartamento(record.get("departamento"));
             funcionario.setDataAdmissao(LocalDate.parse(record.get("dataAdmissao")));
             funcionario.setSituacao(FuncionarioSituacao.valueOf(record.get("situacao")));

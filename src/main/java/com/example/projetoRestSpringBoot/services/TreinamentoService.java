@@ -29,9 +29,11 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static com.example.projetoRestSpringBoot.mapper.ObjectMapper.parseObject;
@@ -115,6 +117,15 @@ public class TreinamentoService {
         // Converte para DTO e adiciona links
         Page<TreinamentoDTO> funcionariosDTOPage = treinamentoPage.map(treinamento -> {
             TreinamentoDTO dto = parseObject(treinamento, TreinamentoDTO.class);
+
+            if(treinamento.getFuncionario() != null){
+                dto.setFuncionarioId(treinamento.getFuncionario().getId());
+                dto.setFuncionarioNome(treinamento.getFuncionario().getNome());
+                dto.setFuncionarioMatricula(treinamento.getFuncionario().getMatricula());
+                dto.setCursoId(treinamento.getCurso().getId());
+                dto.setCursoNome(treinamento.getCurso().getNome());
+            }
+
             addHateosLinks(dto);
             return dto;
         });
@@ -265,8 +276,6 @@ public class TreinamentoService {
         logger.info("Criando um novo registro de treinamento no banco");
 
         if (treinamento == null) throw new RequiredObjectIsNullException();
-
-        // Busca o funcionário e o curso
         Funcionario funcionario = funcionarioRepository.findById(treinamento.getFuncionario().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Funcionario não encontrado"));
 
@@ -279,7 +288,7 @@ public class TreinamentoService {
         entity.setCurso(curso);
         entity.setDataAgendamento(treinamento.getDataAgendamento());
         entity.setDataConcluido(treinamento.getDataConcluido());
-        entity.setDataVencimento(treinamento.getDataVencimento());
+        entity.setDataVencimento(treinamento.getDataConcluido().plusMonths(curso.getValidadeMeses()));
         entity.setInstrutor(treinamento.getInstrutor());
         entity.setStatus(treinamento.getStatus());
 
@@ -303,9 +312,8 @@ public class TreinamentoService {
         entity.setDataVencimento(treinamentoDTO.getDataVencimento());
         entity.setDataConcluido(treinamentoDTO.getDataConcluido());
         entity.setInstrutor(treinamentoDTO.getInstrutor());
-        entity.setStatus(treinamentoDTO.getStatus());
+        entity.setStatus(calcularStatus(entity.getDataVencimento()));
 
-        // Salva e converte para DTO
         var dto = parseObject(repository.save(entity), TreinamentoDTO.class);
         if(entity.getFuncionario() != null){
             dto.setFuncionarioId(entity.getFuncionario().getId());
@@ -369,6 +377,25 @@ public class TreinamentoService {
         dto.add(linkTo(methodOn(TreinamentoController.class).create(parseObject(dto, Treinamento.class))).withRel("create").withType("POST"));
         dto.add(linkTo(methodOn(TreinamentoController.class).update(dto)).withRel("update").withType("PUT"));
         dto.add(linkTo(methodOn(TreinamentoController.class).exportPage(1, 12, "asc", null)).withRel("exportPage").withType("GET"));
+    }
+    private TreinamentoStatus calcularStatus(LocalDate dataVencimento) {
+        LocalDate hoje = LocalDate.now();
+        if (hoje.isAfter(dataVencimento)) {
+            return TreinamentoStatus.VENCIDO;
+        } else if (hoje.plusDays(90).isAfter(dataVencimento)) {
+            return TreinamentoStatus.VENCIMENTO_PROXIMO;
+        } else {
+            return TreinamentoStatus.VALIDO;
+        }
+    }
+
+    @Scheduled(cron = "0 0 0 * * ?") // todo dia à meia-noite
+    public void atualizarStatusTreinamentos() {
+        List<Treinamento> treinamentos = repository.findAll();
+        for (Treinamento t : treinamentos) {
+            t.setStatus(calcularStatus(t.getDataVencimento()));
+        }
+        repository.saveAll(treinamentos);
     }
 
 }
