@@ -1,5 +1,4 @@
 package com.example.projetoRestSpringBoot.file.exporter.factory;
-/**
 import com.example.projetoRestSpringBoot.exception.BadRequestException;
 import com.example.projetoRestSpringBoot.file.exporter.MediaTypes;
 import com.example.projetoRestSpringBoot.file.exporter.contract.FileExporter;
@@ -35,4 +34,3 @@ public class FileExporterFactory {
         }
     }
 }
-**/

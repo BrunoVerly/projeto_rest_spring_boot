@@ -20,6 +20,7 @@ public class TreinamentoDTO extends RepresentationModel<TreinamentoDTO> implemen
     private String funcionarioNome;
     private String funcionarioMatricula;
     private Long cursoId;
+    private String cursoNome;
     private LocalDate dataAgendamento;
     private LocalDate dataConcluido;
     private LocalDate dataVencimento;

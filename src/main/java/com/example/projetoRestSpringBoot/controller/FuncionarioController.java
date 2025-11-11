@@ -3,8 +3,12 @@ package com.example.projetoRestSpringBoot.controller;
 import com.example.projetoRestSpringBoot.controller.docs.FuncionariosControllerDocs;
 import com.example.projetoRestSpringBoot.dto.FuncionarioDTO;
 import com.example.projetoRestSpringBoot.enums.FuncionarioSituacao;
+import com.example.projetoRestSpringBoot.file.exporter.MediaTypes;
 import com.example.projetoRestSpringBoot.model.Funcionario;
 import com.example.projetoRestSpringBoot.services.FuncionarioService;
+import org.springframework.core.io.Resource;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -12,15 +16,18 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/funcionarios/v1")
+@RequestMapping("/funcionario/v1")
 public class FuncionarioController implements FuncionariosControllerDocs {
     @Autowired
     private FuncionarioService service;
@@ -112,6 +119,16 @@ public class FuncionarioController implements FuncionariosControllerDocs {
         return service.create(funcionario);
     }
 
+    @PostMapping(value="/importar",
+                    produces = {
+                        MediaType.APPLICATION_JSON_VALUE,
+                        MediaType.APPLICATION_XML_VALUE,
+                        MediaType.APPLICATION_YAML_VALUE})
+        //@Override
+        public List<FuncionarioDTO> importarFuncionarios (@RequestParam ("file") MultipartFile file) {
+            return service.importarArquivo(file);
+        }
+
 
     @PutMapping(consumes = {
                     MediaType.APPLICATION_JSON_VALUE,
@@ -132,5 +149,35 @@ public class FuncionarioController implements FuncionariosControllerDocs {
     public ResponseEntity<?> delete (@PathVariable("id") long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping(value = "/exportar", produces = {
+            MediaTypes.APPLICATION_XLSX_VALUE,
+            MediaTypes.APPLICATION_TEXT_CSV_VALUE,
+            MediaTypes.APPLICATION_PDF_VALUE})
+
+    public ResponseEntity<Resource> exportPage(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "direction", defaultValue = "asc") String direction,
+            HttpServletRequest request
+    ){
+        var sortDirection = "desc".equalsIgnoreCase(direction) ? Direction.DESC : Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, "nome"));
+
+        String acceptHeader = request.getHeader(HttpHeaders.ACCEPT);
+
+        Resource file = service.exportPage(pageable, acceptHeader);
+
+        var contentType = acceptHeader != null ? acceptHeader : "application/octet-stream";
+        var fileExtension = MediaTypes.APPLICATION_TEXT_CSV_VALUE.equalsIgnoreCase(acceptHeader) ? ".csv" :
+                MediaTypes.APPLICATION_PDF_VALUE.equalsIgnoreCase(acceptHeader) ? ".pdf" : "";
+
+        var filename = "funcionarios" + fileExtension;
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .body(file);
     }
 }
