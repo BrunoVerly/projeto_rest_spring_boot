@@ -1,33 +1,38 @@
-cors:
-  origins:
-    patterns: http://localhost:8080,http://localhost:3000,https://www.example.com
-file:
-  upload-dir: /home/bverly/Downloads/downloads_projeto_spring
+# cors:
+#   origins:
+#     patterns:
+#       - http://localhost:8080
+#       - https://www.example.com
+
 security:
   jwt:
     token:
-        secret-key: 53cr3t7
-        expire-length: 3600000 # 1 hora em milliseconds
+      secret-key: 53cr3t7
+      expire-length: 3600000
+
 email:
   subject: "Default Subject"
   message: "Default Message"
+
 spring:
   application:
     name: projeto_rest_spring_boot
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://azuremysqlbruno.mysql.database.azure.com/projeto_rest_spring_boot?useTimezone=true&serverTimezone=UTC
-    username: master
-    password: bJb%2up0vHcSE^
+    url: "jdbc:mysql://localhost:3306/projeto_rest_spring_boot?useTimezone=true&serverTimezone=UTC"
+    username: docker
+    password: "admin123"
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
   jackson:
     date-format: yyyy-MM-dd
     serialization:
       write-dates-as-timestamps: false
   jpa:
     hibernate:
-      ddl-auto: none
-    properties:
-      hibernate:
+      ddl-auto: validate
     show-sql: false
     open-in-view: false
   mail:
@@ -46,15 +51,12 @@ spring:
       file-size-threshold: 2KB
       max-file-size: 200MB
       max-request-size: 200MB
+
 logging:
   level:
     root: INFO
 
-
-  spring-doc:
-    paths-to-match: /api/**/v1/**
-    swagger-ui:
-      use-root-path: true
-
-
-
+spring-doc:
+  paths-to-match: /api/**/v1/**
+  swagger-ui:
+    use-root-path: true
