@@ -1,4 +1,4 @@
-CREATE TABLE `curso` (
+CREATE TABLE IF NOT EXISTS `curso` (
                          `id` bigint NOT NULL AUTO_INCREMENT,
                          `carga_horaria` int NOT NULL,
                          `descricao` text,

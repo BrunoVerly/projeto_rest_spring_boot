@@ -8,7 +8,7 @@ import com.example.projetoRestSpringBoot.model.Curso;
 import com.example.projetoRestSpringBoot.repository.TreinamentoRepository;
 import com.example.projetoRestSpringBoot.repository.FuncionarioRepository;
 import com.example.projetoRestSpringBoot.repository.CursoRepository;
-import com.example.projetoRestSpringBoot.services.TreinamentoService;
+import com.example.projetoRestSpringBoot.service.TreinamentoService;
 import com.example.projetoRestSpringBoot.unittests.mocks.MockTreinamento;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

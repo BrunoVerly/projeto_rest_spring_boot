@@ -1,22 +1,18 @@
-package com.example.projetoRestSpringBoot.services;
+package com.example.projetoRestSpringBoot.service;
 
 import com.example.projetoRestSpringBoot.controller.CredencialController;
-import com.example.projetoRestSpringBoot.controller.CursoController;
 import com.example.projetoRestSpringBoot.controller.FuncionarioController;
 import com.example.projetoRestSpringBoot.dto.CredencialDTO;
-import com.example.projetoRestSpringBoot.dto.FuncionarioDTO;
 import com.example.projetoRestSpringBoot.enums.CredencialStatus;
-import com.example.projetoRestSpringBoot.enums.FuncionarioSituacao;
-import com.example.projetoRestSpringBoot.enums.TreinamentoStatus;
 import com.example.projetoRestSpringBoot.exception.RequiredObjectIsNullException;
 import com.example.projetoRestSpringBoot.exception.ResourceNotFoundException;
 import com.example.projetoRestSpringBoot.file.exporter.contract.FileExporter;
 import com.example.projetoRestSpringBoot.file.exporter.factory.FileExporterFactory;
 import com.example.projetoRestSpringBoot.model.Credencial;
 import com.example.projetoRestSpringBoot.model.Funcionario;
-import com.example.projetoRestSpringBoot.model.Treinamento;
 import com.example.projetoRestSpringBoot.repository.CredencialRepository;
 import com.example.projetoRestSpringBoot.repository.FuncionarioRepository;
+import com.example.projetoRestSpringBoot.service.linkhateoas.HateoasLinkManager;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +33,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static com.example.projetoRestSpringBoot.mapper.ObjectMapper.parseObject;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 
@@ -71,7 +66,7 @@ public class CredencialService {
                 credencial.setFuncionarioMatricula(dto.getFuncionario().getMatricula());
             }
 
-            addHateosLinks(credencial);
+            HateoasLinkManager.addCredencialDetailLinks(credencial);
             return credencial;
         });
 
@@ -82,7 +77,9 @@ public class CredencialService {
                         String.valueOf(pageable.getSort())
                 )
         ).withSelfRel();
-        return assembler.toModel(credenciaisWithLinks, findAllLink);
+        var result = assembler.toModel(credenciaisWithLinks, findAllLink);
+        HateoasLinkManager.addCredencialListPageLinks(result);
+        return result;
     }
 
     public CredencialDTO findById(long id) {
@@ -100,7 +97,7 @@ public class CredencialService {
             dto.setFuncionarioMatricula(entity.getFuncionario().getMatricula());
         }
 
-        addHateosLinks(dto);
+        HateoasLinkManager.addCredencialDetailLinks(dto);
         return dto;
     }
 
@@ -127,7 +124,7 @@ public class CredencialService {
 
         // Converte para DTO e adiciona HATEOAS links
         var dto = parseObject(savedEntity, CredencialDTO.class);
-        addHateosLinks(dto);
+        HateoasLinkManager.addCredencialDetailLinks(dto);
 
         return repository.save(entity);
     }
@@ -164,34 +161,35 @@ public class CredencialService {
             dto.setFuncionarioNome(entity.getFuncionario().getNome());
             dto.setFuncionarioMatricula(entity.getFuncionario().getMatricula());
         }
-        addHateosLinks(dto);
+        HateoasLinkManager.addCredencialDetailLinks(dto);
         return dto;
     }
+
     public PagedModel<EntityModel<CredencialDTO>> findByStatus(
             CredencialStatus status, Pageable pageable) {
 
-        logger.info("Procurando funcionários pela situação");
+        logger.info("Procurando credenciais pela situação");
 
         // Busca a página de entidades
-        Page<Credencial> CredencialPage = repository.findByStatus(status, pageable);
+        Page<Credencial> credencialPage = repository.findByStatus(status, pageable);
 
         // Converte para DTO e adiciona links
-        Page<CredencialDTO> CredencialDTOPage = CredencialPage.map(funcionario -> {
-            CredencialDTO dto = parseObject(funcionario, CredencialDTO.class);
+        Page<CredencialDTO> credencialDTOPage = credencialPage.map(credencial -> {
+            CredencialDTO dto = parseObject(credencial, CredencialDTO.class);
 
-            if(funcionario.getFuncionario() != null){
-                dto.setFuncionarioId(funcionario.getFuncionario().getId());
-                dto.setFuncionarioNome(funcionario.getFuncionario().getNome());
-                dto.setFuncionarioMatricula(funcionario.getFuncionario().getMatricula());
+            if(credencial.getFuncionario() != null){
+                dto.setFuncionarioId(credencial.getFuncionario().getId());
+                dto.setFuncionarioNome(credencial.getFuncionario().getNome());
+                dto.setFuncionarioMatricula(credencial.getFuncionario().getMatricula());
             }
 
-            addHateosLinks(dto);
+            HateoasLinkManager.addCredencialDetailLinks(dto);
             return dto;
         });
 
         // Cria link de página raiz
         Link findAllLink = WebMvcLinkBuilder.linkTo(
-                methodOn(FuncionarioController.class).findAll(
+                methodOn(CredencialController.class).findAll(
                         pageable.getPageNumber(),
                         pageable.getPageSize(),
                         String.valueOf(pageable.getSort())
@@ -199,8 +197,11 @@ public class CredencialService {
         ).withSelfRel();
 
         // Converte para PagedModel
-        return assembler.toModel(CredencialDTOPage, findAllLink);
+        var result = assembler.toModel(credencialDTOPage, findAllLink);
+        HateoasLinkManager.addCredencialListPageLinks(result);
+        return result;
     }
+
     public PagedModel<EntityModel<CredencialDTO>> findCredencialEmited(
             LocalDate startDate, LocalDate endDate, Pageable pageable) {
 
@@ -212,13 +213,13 @@ public class CredencialService {
         // Converte para DTO e adiciona links
         Page<CredencialDTO> credencialDTOPage = credencialPage.map(credencial -> {
             CredencialDTO dto = parseObject(credencial, CredencialDTO.class);
-            addHateosLinks(dto);
+            HateoasLinkManager.addCredencialDetailLinks(dto);
             return dto;
         });
 
         // Cria link de página raiz
         Link findAllLink = WebMvcLinkBuilder.linkTo(
-                methodOn(FuncionarioController.class).findAll(
+                methodOn(CredencialController.class).findAll(
                         pageable.getPageNumber(),
                         pageable.getPageSize(),
                         String.valueOf(pageable.getSort())
@@ -226,7 +227,9 @@ public class CredencialService {
         ).withSelfRel();
 
         // Converte para PagedModel
-        return assembler.toModel(credencialDTOPage, findAllLink);
+        var result = assembler.toModel(credencialDTOPage, findAllLink);
+        HateoasLinkManager.addCredencialListPageLinks(result);
+        return result;
     }
 
     public PagedModel<EntityModel<CredencialDTO>> findCredencialExpiring(
@@ -240,13 +243,13 @@ public class CredencialService {
         // Converte para DTO e adiciona links
         Page<CredencialDTO> credencialDTOPage = credencialPage.map(credencial -> {
             CredencialDTO dto = parseObject(credencial, CredencialDTO.class);
-            addHateosLinks(dto);
+            HateoasLinkManager.addCredencialDetailLinks(dto);
             return dto;
         });
 
         // Cria link de página raiz
         Link findAllLink = WebMvcLinkBuilder.linkTo(
-                methodOn(FuncionarioController.class).findAll(
+                methodOn(CredencialController.class).findAll(
                         pageable.getPageNumber(),
                         pageable.getPageSize(),
                         String.valueOf(pageable.getSort())
@@ -254,7 +257,9 @@ public class CredencialService {
         ).withSelfRel();
 
         // Converte para PagedModel
-        return assembler.toModel(credencialDTOPage, findAllLink);
+        var result = assembler.toModel(credencialDTOPage, findAllLink);
+        HateoasLinkManager.addCredencialListPageLinks(result);
+        return result;
     }
 
 
@@ -295,15 +300,13 @@ public class CredencialService {
         }
     }
 
-
-    private static void addHateosLinks(CredencialDTO dto) {
-        dto.add(linkTo(methodOn(CredencialController.class).findAll(0, 12, "asc")).withRel("findAll").withType("GET"));
-        dto.add(linkTo(methodOn(CredencialController.class).findById(dto.getId())).withSelfRel().withType("GET"));
-        dto.add(linkTo(methodOn(CredencialController.class).delete(dto.getId())).withRel("delete").withType("GET"));
-        dto.add(linkTo(methodOn(CredencialController.class).create(parseObject(dto, Credencial.class))).withRel("create").withType("POST"));
-        dto.add(linkTo(methodOn(CredencialController.class).update(dto)).withRel("update").withType("PUT"));
-        dto.add(linkTo(methodOn(CredencialController.class).findByStatus(dto.getStatus(), 0, 12, "asc")).withRel("status").withType("GET"));
-        dto.add(linkTo(methodOn(CredencialController.class).exportPage(1, 12, "asc", null)).withRel("exportPage").withType("GET"));
+    @Scheduled(cron = "0 0 0 * * ?") // todo dia à meia-noite
+    public void atualizarStatusCredenciais() {
+        List<Credencial> credenciais = repository.findAll();
+        for (Credencial c : credenciais) {
+            c.setStatus(calcularStatus(c.getDataVencimento()));
+        }
+        repository.saveAll(credenciais);
     }
 
     private CredencialStatus calcularStatus(LocalDate dataVencimento) {
@@ -317,14 +320,4 @@ public class CredencialService {
         }
     }
 
-    @Scheduled(cron = "0 0 0 * * ?") // todo dia à meia-noite
-    public void atualizarStatusCredenciais() {
-        List<Credencial> credenciais = repository.findAll();
-        for (Credencial c : credenciais) {
-            c.setStatus(calcularStatus(c.getDataVencimento()));
-        }
-        repository.saveAll(credenciais);
-    }
-
 }
-

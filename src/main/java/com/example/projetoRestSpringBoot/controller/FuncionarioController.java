@@ -2,13 +2,14 @@ package com.example.projetoRestSpringBoot.controller;
 
 import com.example.projetoRestSpringBoot.controller.docs.FuncionariosControllerDocs;
 import com.example.projetoRestSpringBoot.dto.FuncionarioDTO;
+import com.example.projetoRestSpringBoot.dto.IntervaloDataDTO;
 import com.example.projetoRestSpringBoot.enums.FuncionarioSituacao;
 import com.example.projetoRestSpringBoot.file.exporter.MediaTypes;
 import com.example.projetoRestSpringBoot.model.Funcionario;
-import com.example.projetoRestSpringBoot.services.FuncionarioService;
+import com.example.projetoRestSpringBoot.service.FuncionarioService;
+import com.example.projetoRestSpringBoot.service.linkhateoas.HateoasLinkManager;
 import org.springframework.core.io.Resource;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,12 +23,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 
 @RestController
-@RequestMapping("/funcionario/v1")
+@RequestMapping("/api/funcionario/v1")
 public class FuncionarioController implements FuncionariosControllerDocs {
     @Autowired
     private FuncionarioService service;
@@ -40,10 +39,12 @@ public class FuncionarioController implements FuncionariosControllerDocs {
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
             @RequestParam(value = "direction", defaultValue = "asc") String direction
-            ) {
+    ) {
         var sortDirection = "desc".equalsIgnoreCase(direction) ? Direction.DESC : Direction.ASC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, "nome"));
-        return ResponseEntity.ok(service.findAll(pageable));
+        var result = service.findAll(pageable);
+        HateoasLinkManager.addFuncionarioListPageLinks(result);
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping(value = "/buscarPorNome/{nome}", produces = {MediaType.APPLICATION_JSON_VALUE,
@@ -57,8 +58,11 @@ public class FuncionarioController implements FuncionariosControllerDocs {
     ) {
         var sortDirection = "desc".equalsIgnoreCase(direction) ? Direction.DESC : Direction.ASC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, "nome"));
-        return ResponseEntity.ok(service.findByName(nome, pageable));
+        var result = service.findByName(nome, pageable);
+        HateoasLinkManager.addFuncionarioListPageLinks(result);
+        return ResponseEntity.ok(result);
     }
+
     @GetMapping(value = "/buscarPorSituacao/{situacao}", produces = {MediaType.APPLICATION_JSON_VALUE,
             MediaType.APPLICATION_XML_VALUE,
             MediaType.APPLICATION_YAML_VALUE})
@@ -71,27 +75,26 @@ public class FuncionarioController implements FuncionariosControllerDocs {
     ) {
         var sortDirection = "desc".equalsIgnoreCase(direction) ? Direction.DESC : Direction.ASC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, "nome"));
-        return ResponseEntity.ok(service.findBySituacao(situacao, pageable));
+        var result = service.findBySituacao(situacao, pageable);
+        HateoasLinkManager.addFuncionarioListPageLinks(result);
+        return ResponseEntity.ok(result);
     }
 
-    @GetMapping(value = "/buscarPorAdmissao",
+    @PostMapping(value = "/buscarPorAdmissao",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_YAML_VALUE})
     public ResponseEntity<PagedModel<EntityModel<FuncionarioDTO>>> findByAdmissao(
-            @RequestBody Map<String, String> body,
+            @RequestBody IntervaloDataDTO intervalo,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
             @RequestParam(value = "direction", defaultValue = "asc") String direction) {
 
-        LocalDate startDate = body.containsKey("startDate") ? LocalDate.parse(body.get("startDate")) : LocalDate.now();
-        LocalDate endDate = body.containsKey("endDate") ? LocalDate.parse(body.get("endDate")) : LocalDate.now();
-
-            var sortDirection = "desc".equalsIgnoreCase(direction) ? Direction.DESC : Direction.ASC;
-            Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, "nome"));
-            return ResponseEntity.ok(service.findFuncionarioByAddmitedDate(startDate, endDate, pageable));
-
+        var sortDirection = "desc".equalsIgnoreCase(direction) ? Direction.DESC : Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, "nome"));
+        var result = service.findFuncionarioByAddmitedDate(intervalo.getStartDate(), intervalo.getEndDate(), pageable);
+        HateoasLinkManager.addFuncionarioListPageLinks(result);
+        return ResponseEntity.ok(result);
     }
-
 
     @GetMapping(value = "/buscarPorId/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_YAML_VALUE})
     @Override
@@ -108,9 +111,9 @@ public class FuncionarioController implements FuncionariosControllerDocs {
     }
 
     @PostMapping(consumes = {
-                    MediaType.APPLICATION_JSON_VALUE,
-                    MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_YAML_VALUE},
-                produces = {
+            MediaType.APPLICATION_JSON_VALUE,
+            MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_YAML_VALUE},
+            produces = {
                     MediaType.APPLICATION_JSON_VALUE,
                     MediaType.APPLICATION_XML_VALUE,
                     MediaType.APPLICATION_YAML_VALUE})
@@ -120,21 +123,20 @@ public class FuncionarioController implements FuncionariosControllerDocs {
     }
 
     @PostMapping(value="/importar",
-                    produces = {
-                        MediaType.APPLICATION_JSON_VALUE,
-                        MediaType.APPLICATION_XML_VALUE,
-                        MediaType.APPLICATION_YAML_VALUE})
-        //@Override
-        public List<FuncionarioDTO> importarFuncionarios (@RequestParam ("file") MultipartFile file) {
-            return service.importarArquivo(file);
-        }
-
-
-    @PutMapping(consumes = {
+            produces = {
                     MediaType.APPLICATION_JSON_VALUE,
                     MediaType.APPLICATION_XML_VALUE,
-                    MediaType.APPLICATION_YAML_VALUE},
-                produces = {
+                    MediaType.APPLICATION_YAML_VALUE})
+    //@Override
+    public List<FuncionarioDTO> importarFuncionarios (@RequestParam ("file") MultipartFile file) {
+        return service.importarArquivo(file);
+    }
+
+    @PutMapping(consumes = {
+            MediaType.APPLICATION_JSON_VALUE,
+            MediaType.APPLICATION_XML_VALUE,
+            MediaType.APPLICATION_YAML_VALUE},
+            produces = {
                     MediaType.APPLICATION_JSON_VALUE,
                     MediaType.APPLICATION_XML_VALUE,
                     MediaType.APPLICATION_YAML_VALUE})
@@ -142,7 +144,6 @@ public class FuncionarioController implements FuncionariosControllerDocs {
     public FuncionarioDTO update(@RequestBody FuncionarioDTO funcionario) {
         return service.update(funcionario);
     }
-
 
     @DeleteMapping(value = "/{id}")
     @Override
@@ -155,7 +156,6 @@ public class FuncionarioController implements FuncionariosControllerDocs {
             MediaTypes.APPLICATION_XLSX_VALUE,
             MediaTypes.APPLICATION_TEXT_CSV_VALUE,
             MediaTypes.APPLICATION_PDF_VALUE})
-
     public ResponseEntity<Resource> exportPage(
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
@@ -166,7 +166,6 @@ public class FuncionarioController implements FuncionariosControllerDocs {
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, "nome"));
 
         String acceptHeader = request.getHeader(HttpHeaders.ACCEPT);
-
         Resource file = service.exportPage(pageable, acceptHeader);
 
         var contentType = acceptHeader != null ? acceptHeader : "application/octet-stream";

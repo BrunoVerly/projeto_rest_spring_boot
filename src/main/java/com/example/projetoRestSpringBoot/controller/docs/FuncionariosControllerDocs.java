@@ -1,6 +1,7 @@
 package com.example.projetoRestSpringBoot.controller.docs;
 
 import com.example.projetoRestSpringBoot.dto.FuncionarioDTO;
+import com.example.projetoRestSpringBoot.dto.IntervaloDataDTO;
 import com.example.projetoRestSpringBoot.enums.FuncionarioSituacao;
 import com.example.projetoRestSpringBoot.file.exporter.MediaTypes;
 import com.example.projetoRestSpringBoot.model.Funcionario;
@@ -123,7 +124,7 @@ public interface FuncionariosControllerDocs {
                     @ApiResponse(description = "Internal error", responseCode = "500", content = @Content),
             })
     ResponseEntity<PagedModel<EntityModel<FuncionarioDTO>>> findByAdmissao(
-            @RequestBody Map<String, String> body,
+            @RequestBody IntervaloDataDTO intervalo,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "12") int size,
             @RequestParam(value = "direction", defaultValue = "asc") String direction

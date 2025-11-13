@@ -2,6 +2,7 @@ package com.example.projetoRestSpringBoot.controller.docs;
 
 import com.example.projetoRestSpringBoot.dto.CredencialDTO;
 import com.example.projetoRestSpringBoot.dto.FuncionarioDTO;
+import com.example.projetoRestSpringBoot.dto.IntervaloDataDTO;
 import com.example.projetoRestSpringBoot.enums.CredencialStatus;
 import com.example.projetoRestSpringBoot.file.exporter.MediaTypes;
 import com.example.projetoRestSpringBoot.model.Credencial;
@@ -71,7 +72,7 @@ public interface CredencialControllerDocs {
                     @ApiResponse(description = "Internal error", responseCode = "500", content = @Content),
             })
     ResponseEntity<PagedModel<EntityModel<CredencialDTO>>> findCredencialEmited(
-            @RequestBody Map<String, String> body,
+            @RequestBody IntervaloDataDTO intervalo,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "12") int size,
             @RequestParam(value = "direction", defaultValue = "asc") String direction
@@ -97,7 +98,7 @@ public interface CredencialControllerDocs {
                     @ApiResponse(description = "Internal error", responseCode = "500", content = @Content),
             })
     ResponseEntity<PagedModel<EntityModel<CredencialDTO>>> findCredencialExpiring(
-            @RequestBody Map<String, String> body,
+            @RequestBody IntervaloDataDTO intervalo,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "12") int size,
             @RequestParam(value = "direction", defaultValue = "asc") String direction

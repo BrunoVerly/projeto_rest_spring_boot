@@ -6,7 +6,7 @@ import com.example.projetoRestSpringBoot.model.Credencial;
 import com.example.projetoRestSpringBoot.model.Funcionario;
 import com.example.projetoRestSpringBoot.repository.CredencialRepository;
 import com.example.projetoRestSpringBoot.repository.FuncionarioRepository;
-import com.example.projetoRestSpringBoot.services.CredencialService;
+import com.example.projetoRestSpringBoot.service.CredencialService;
 import com.example.projetoRestSpringBoot.unittests.mocks.MockCredencial;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

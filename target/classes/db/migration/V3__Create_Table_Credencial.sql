@@ -1,5 +1,5 @@
 
-CREATE TABLE `credencial` (
+CREATE TABLE IF NOT EXISTS `credencial` (
                               `id` bigint NOT NULL AUTO_INCREMENT,
                               `data_emissao` date NOT NULL,
                               `data_vencimento` date NOT NULL,

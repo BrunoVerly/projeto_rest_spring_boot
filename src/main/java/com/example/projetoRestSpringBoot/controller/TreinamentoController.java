@@ -1,11 +1,12 @@
 package com.example.projetoRestSpringBoot.controller;
 
 import com.example.projetoRestSpringBoot.controller.docs.TreinamentoControllerDocs;
+import com.example.projetoRestSpringBoot.dto.IntervaloDataDTO;
 import com.example.projetoRestSpringBoot.dto.TreinamentoDTO;
 import com.example.projetoRestSpringBoot.enums.TreinamentoStatus;
 import com.example.projetoRestSpringBoot.file.exporter.MediaTypes;
 import com.example.projetoRestSpringBoot.model.Treinamento;
-import com.example.projetoRestSpringBoot.services.TreinamentoService;
+import com.example.projetoRestSpringBoot.service.TreinamentoService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -20,11 +21,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/treinamento/v1")
+@RequestMapping("/api/treinamento/v1")
 public class TreinamentoController implements TreinamentoControllerDocs {
     @Autowired
     private TreinamentoService service;
@@ -37,7 +37,7 @@ public class TreinamentoController implements TreinamentoControllerDocs {
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
             @RequestParam(value = "direction", defaultValue = "asc") String direction
-            ) {
+    ) {
         var sortDirection = "desc".equalsIgnoreCase(direction) ? Direction.DESC : Direction.ASC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, "dataVencimento"));
         return ResponseEntity.ok(service.findAll(pageable));
@@ -47,8 +47,7 @@ public class TreinamentoController implements TreinamentoControllerDocs {
     @GetMapping(value = "buscarPorId/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_YAML_VALUE})
     @Override
     public TreinamentoDTO findById (@PathVariable("id") long id) {
-        var treinamento = service.findById(id);
-        return treinamento;
+        return service.findById(id);
     }
 
     @GetMapping(value="/buscarPorStatus/{status}",produces = {MediaType.APPLICATION_JSON_VALUE,
@@ -63,13 +62,12 @@ public class TreinamentoController implements TreinamentoControllerDocs {
     ) {
         var sortDirection = "desc".equalsIgnoreCase(direction) ? Direction.DESC : Direction.ASC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, "dataVencimento"));
-        return ResponseEntity.ok(service.findAll(pageable));
+        return ResponseEntity.ok(service.findByStatus(status, pageable));
     }
 
     @GetMapping(value="/buscarPorInstrutor",produces = {MediaType.APPLICATION_JSON_VALUE,
             MediaType.APPLICATION_XML_VALUE,
             MediaType.APPLICATION_YAML_VALUE})
-    //@Override
     public ResponseEntity<PagedModel<EntityModel<TreinamentoDTO>>> findByInstrutor(
             @RequestBody Map<String, String> body,
             @RequestParam(value = "page", defaultValue = "0") int page,
@@ -82,51 +80,38 @@ public class TreinamentoController implements TreinamentoControllerDocs {
         return ResponseEntity.ok(service.findByInstrutor(instrutor, pageable));
     }
 
-
-
-    @GetMapping(value = "/buscarPorVencimento",
+    @PostMapping(value = "/buscarPorVencimento",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_YAML_VALUE})
-    public ResponseEntity<PagedModel<EntityModel<TreinamentoDTO>>>  findTreinamentoExpiring(
-            @RequestBody Map<String, String> body,
+    public ResponseEntity<PagedModel<EntityModel<TreinamentoDTO>>> findTreinamentoExpiring(
+            @RequestBody IntervaloDataDTO intervalo,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
             @RequestParam(value = "direction", defaultValue = "asc") String direction) {
-
-        LocalDate startDate = body.containsKey("startDate") ? LocalDate.parse(body.get("startDate")) : LocalDate.now();
-        LocalDate endDate = body.containsKey("endDate") ? LocalDate.parse(body.get("endDate")) : LocalDate.now();
 
         var sortDirection = "desc".equalsIgnoreCase(direction) ? Direction.DESC : Direction.ASC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, "dataVencimento"));
-        return ResponseEntity.ok(service.findTreinamentoExpiring(startDate, endDate, pageable));
-
+        return ResponseEntity.ok(service.findTreinamentoExpiring(intervalo.getStartDate(), intervalo.getEndDate(), pageable));
     }
 
-    @GetMapping(value = "/buscarPorConclusao",
+    @PostMapping(value = "/buscarPorConclusao",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_YAML_VALUE})
-    public ResponseEntity<PagedModel<EntityModel<TreinamentoDTO>>>  findTreinamentoConluded(
-            @RequestBody Map<String, String> body,
+    public ResponseEntity<PagedModel<EntityModel<TreinamentoDTO>>> findTreinamentoConluded(
+            @RequestBody IntervaloDataDTO intervalo,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
             @RequestParam(value = "direction", defaultValue = "asc") String direction) {
 
-        LocalDate startDate = body.containsKey("startDate") ? LocalDate.parse(body.get("startDate")) : LocalDate.now();
-        LocalDate endDate = body.containsKey("endDate") ? LocalDate.parse(body.get("endDate")) : LocalDate.now();
-
         var sortDirection = "desc".equalsIgnoreCase(direction) ? Direction.DESC : Direction.ASC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, "dataConcluido"));
-        return ResponseEntity.ok(service.findTreinamentoConluded(startDate, endDate, pageable));
-
+        return ResponseEntity.ok(service.findTreinamentoConluded(intervalo.getStartDate(), intervalo.getEndDate(), pageable));
     }
 
-
-
-
     @PostMapping(consumes = {
-                    MediaType.APPLICATION_JSON_VALUE,
-                    MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_YAML_VALUE},
-                produces = {
+            MediaType.APPLICATION_JSON_VALUE,
+            MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_YAML_VALUE},
+            produces = {
                     MediaType.APPLICATION_JSON_VALUE,
                     MediaType.APPLICATION_XML_VALUE,
                     MediaType.APPLICATION_YAML_VALUE})
@@ -135,12 +120,11 @@ public class TreinamentoController implements TreinamentoControllerDocs {
         return service.create(treinamento);
     }
 
-
     @PutMapping(consumes = {
-                    MediaType.APPLICATION_JSON_VALUE,
-                    MediaType.APPLICATION_XML_VALUE,
-                    MediaType.APPLICATION_YAML_VALUE},
-                produces = {
+            MediaType.APPLICATION_JSON_VALUE,
+            MediaType.APPLICATION_XML_VALUE,
+            MediaType.APPLICATION_YAML_VALUE},
+            produces = {
                     MediaType.APPLICATION_JSON_VALUE,
                     MediaType.APPLICATION_XML_VALUE,
                     MediaType.APPLICATION_YAML_VALUE})
@@ -148,7 +132,6 @@ public class TreinamentoController implements TreinamentoControllerDocs {
     public TreinamentoDTO update(@RequestBody TreinamentoDTO treinamento) {
         return service.update(treinamento);
     }
-
 
     @DeleteMapping(value = "/{id}")
     @Override

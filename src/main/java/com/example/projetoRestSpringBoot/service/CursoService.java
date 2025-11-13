@@ -1,11 +1,8 @@
-package com.example.projetoRestSpringBoot.services;
+package com.example.projetoRestSpringBoot.service;
 
 import com.example.projetoRestSpringBoot.controller.CursoController;
-import com.example.projetoRestSpringBoot.controller.FuncionarioController;
 import com.example.projetoRestSpringBoot.dto.CursoDTO;
-import com.example.projetoRestSpringBoot.dto.FuncionarioDTO;
 import com.example.projetoRestSpringBoot.exception.BadRequestException;
-import com.example.projetoRestSpringBoot.exception.FileStorageException;
 import com.example.projetoRestSpringBoot.exception.RequiredObjectIsNullException;
 import com.example.projetoRestSpringBoot.exception.ResourceNotFoundException;
 import com.example.projetoRestSpringBoot.file.exporter.contract.FileExporter;
@@ -13,8 +10,8 @@ import com.example.projetoRestSpringBoot.file.exporter.factory.FileExporterFacto
 import com.example.projetoRestSpringBoot.file.importer.contract.FileImporter;
 import com.example.projetoRestSpringBoot.file.importer.factory.FileImporterFactory;
 import com.example.projetoRestSpringBoot.model.Curso;
-import com.example.projetoRestSpringBoot.model.Funcionario;
 import com.example.projetoRestSpringBoot.repository.CursoRepository;
+import com.example.projetoRestSpringBoot.service.linkhateoas.HateoasLinkManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +31,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import static com.example.projetoRestSpringBoot.mapper.ObjectMapper.parseObject;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 
@@ -59,7 +55,7 @@ public class CursoService {
         var people = repository.findAll(pageable);
         Page<CursoDTO> peopleWithLinks = people.map(dto -> {
             CursoDTO curso = parseObject(dto, CursoDTO.class);
-            addHateosLinks(curso);
+            HateoasLinkManager.addCursoDetailLinks(curso);
             return curso;
         });
         Link findAllLink = WebMvcLinkBuilder.linkTo(
@@ -79,7 +75,7 @@ public class CursoService {
                 .orElseThrow(() -> new ResourceNotFoundException("Id nao encontrado"));
 
         var dto = parseObject(entity, CursoDTO.class);
-        addHateosLinks(dto);
+        HateoasLinkManager.addCursoDetailLinks(dto);
         return dto;
     }
 
@@ -89,7 +85,7 @@ public class CursoService {
         if (curso == null) throw new RequiredObjectIsNullException();
         var entity = parseObject(curso, Curso.class);
         var dto = parseObject(repository.save(entity), CursoDTO.class);
-        addHateosLinks(dto);
+        HateoasLinkManager.addCursoDetailLinks(dto);
         return repository.save(entity);
     }
 
@@ -99,7 +95,7 @@ public class CursoService {
         var cursos = repository.findCursoByName(nome, pageable);
         var cursosLink = cursos.map(dto -> {
             var curso = parseObject(dto, CursoDTO.class);
-            addHateosLinks(curso);
+            HateoasLinkManager.addCursoDetailLinks(curso);
             return curso;
         });
         Link findAllLink = WebMvcLinkBuilder.linkTo(
@@ -128,7 +124,7 @@ public class CursoService {
         entity.setTipoObrigatoriedade(curso.getTipoObrigatoriedade());
 
         var dto = parseObject(repository.save(entity), CursoDTO.class);
-        addHateosLinks(dto);
+        HateoasLinkManager.addCursoDetailLinks(dto);
         return dto;
 
     }
@@ -157,17 +153,6 @@ public class CursoService {
         }
     }
 
-    private static void addHateosLinks(CursoDTO dto) {
-        dto.add(linkTo(methodOn(CursoController.class).findAll(0, 12, "asc")).withRel("findAll").withType("GET"));
-        dto.add(linkTo(methodOn(CursoController.class).findById(dto.getId())).withSelfRel().withType("GET"));
-        dto.add(linkTo(methodOn(CursoController.class).delete(dto.getId())).withRel("delete").withType("GET"));
-        dto.add(linkTo(methodOn(CursoController.class).create(parseObject(dto, Curso.class))).withRel("create").withType("POST"));
-        dto.add(linkTo(methodOn(CursoController.class).update(dto)).withRel("update").withType("PUT"));
-        dto.add(linkTo(methodOn(CursoController.class)).slash("importarArquivo").withRel("importarArquivo").withType("POST"));
-        dto.add(linkTo(methodOn(CursoController.class).exportPage(1, 12, "asc", null)).withRel("exportPage").withType("GET"));
-        dto.add(linkTo(methodOn(CursoController.class).findByName("",1, 12, "asc")).withRel("findByName").withType("GET"));
-    }
-
     public List<CursoDTO> importarArquivo(MultipartFile file) {
         logger.info(String.format("Importando cursos em massa a partir de um arquivo"));
         if (file.isEmpty()) throw new BadRequestException("Arquivo vazio");
@@ -176,15 +161,14 @@ public class CursoService {
             String fileName = Optional.ofNullable(file.getOriginalFilename()).orElseThrow(() -> new BadRequestException("Nome do arquivo ausente"));
             FileImporter importer = this.importer.getImporter(fileName);
 
-
             List<Curso> entities = importer.importarCursos(inputStream).stream()
                     .map(dto -> repository.save(parseObject(dto, Curso.class)))
                     .toList();
 
             return entities.stream()
                     .map(entity -> {
-                        var  dto = parseObject(entity, CursoDTO.class);
-                        addHateosLinks(dto);
+                        var dto = parseObject(entity, CursoDTO.class);
+                        HateoasLinkManager.addCursoDetailLinks(dto);
                         return dto;
                     })
                     .toList();
@@ -194,4 +178,3 @@ public class CursoService {
     }
 
 }
-

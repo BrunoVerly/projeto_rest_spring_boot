@@ -1,4 +1,4 @@
-CREATE TABLE `funcionario` (
+CREATE TABLE IF NOT EXISTS `funcionario` (
                                `id` bigint NOT NULL AUTO_INCREMENT,
                                `cargo` varchar(100) NOT NULL,
                                `cpf` varchar(14) NOT NULL,

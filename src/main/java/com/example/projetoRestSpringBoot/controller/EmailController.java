@@ -2,7 +2,7 @@ package com.example.projetoRestSpringBoot.controller;
 
 import com.example.projetoRestSpringBoot.controller.docs.EmailControllerDocs;
 import com.example.projetoRestSpringBoot.dto.request.EmailRequestDTO;
-import com.example.projetoRestSpringBoot.services.EmailService;
+import com.example.projetoRestSpringBoot.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequestMapping("/email/v1")
+@RequestMapping("/api/email/v1")
 public class EmailController implements EmailControllerDocs {
 
     @Autowired

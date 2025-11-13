@@ -1,4 +1,4 @@
-CREATE TABLE `treinamento` (
+CREATE TABLE IF NOT EXISTS `treinamento` (
                                `id` bigint NOT NULL AUTO_INCREMENT,
                                `data_agendamento` date NOT NULL,
                                `data_concluido` date DEFAULT NULL,

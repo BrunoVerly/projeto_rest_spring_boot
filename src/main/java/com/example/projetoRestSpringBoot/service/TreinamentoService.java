@@ -1,23 +1,20 @@
-package com.example.projetoRestSpringBoot.services;
+package com.example.projetoRestSpringBoot.service;
 
 import com.example.projetoRestSpringBoot.controller.FuncionarioController;
 import com.example.projetoRestSpringBoot.controller.TreinamentoController;
 import com.example.projetoRestSpringBoot.dto.TreinamentoDTO;
-import com.example.projetoRestSpringBoot.dto.FuncionarioDTO;
-import com.example.projetoRestSpringBoot.dto.TreinamentoDTO;
-import com.example.projetoRestSpringBoot.enums.FuncionarioSituacao;
 import com.example.projetoRestSpringBoot.enums.TreinamentoStatus;
 import com.example.projetoRestSpringBoot.exception.RequiredObjectIsNullException;
 import com.example.projetoRestSpringBoot.exception.ResourceNotFoundException;
 import com.example.projetoRestSpringBoot.file.exporter.contract.FileExporter;
 import com.example.projetoRestSpringBoot.file.exporter.factory.FileExporterFactory;
-import com.example.projetoRestSpringBoot.model.Credencial;
 import com.example.projetoRestSpringBoot.model.Curso;
 import com.example.projetoRestSpringBoot.model.Funcionario;
 import com.example.projetoRestSpringBoot.model.Treinamento;
 import com.example.projetoRestSpringBoot.repository.CursoRepository;
 import com.example.projetoRestSpringBoot.repository.FuncionarioRepository;
 import com.example.projetoRestSpringBoot.repository.TreinamentoRepository;
+import com.example.projetoRestSpringBoot.service.linkhateoas.HateoasLinkManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +34,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static com.example.projetoRestSpringBoot.mapper.ObjectMapper.parseObject;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 
@@ -74,7 +70,7 @@ public class TreinamentoService {
                 treinamento.setCursoId(dto.getCurso().getId());
                 treinamento.setCursoNome(dto.getCurso().getNome());
             }
-            addHateosLinks(treinamento);
+            HateoasLinkManager.addTreinamentoDetailLinks(treinamento);
             return treinamento;
         });
         Link findAllLink = WebMvcLinkBuilder.linkTo(
@@ -84,7 +80,9 @@ public class TreinamentoService {
                         String.valueOf(pageable.getSort())
                 )
         ).withSelfRel();
-        return assembler.toModel(peopleWithLinks, findAllLink);
+        var result = assembler.toModel(peopleWithLinks, findAllLink);
+        HateoasLinkManager.addTreinamentoListPageLinks(result);
+        return result;
     }
 
     public TreinamentoDTO findById(long id) {
@@ -102,19 +100,17 @@ public class TreinamentoService {
             dto.setCursoId(entity.getCurso().getId());
             dto.setCursoNome(entity.getCurso().getNome());
         }
-        addHateosLinks(dto);
+        HateoasLinkManager.addTreinamentoDetailLinks(dto);
         return dto;
     }
 
     public PagedModel<EntityModel<TreinamentoDTO>> findByInstrutor(
             String instrutor, Pageable pageable) {
 
-        logger.info("Procurando treinamentos por status");
+        logger.info("Procurando treinamentos por instrutor");
 
-        // Busca a página de entidades
         Page<Treinamento> treinamentoPage = repository.findByInstrutor(instrutor, pageable);
 
-        // Converte para DTO e adiciona links
         Page<TreinamentoDTO> funcionariosDTOPage = treinamentoPage.map(treinamento -> {
             TreinamentoDTO dto = parseObject(treinamento, TreinamentoDTO.class);
 
@@ -126,11 +122,10 @@ public class TreinamentoService {
                 dto.setCursoNome(treinamento.getCurso().getNome());
             }
 
-            addHateosLinks(dto);
+            HateoasLinkManager.addTreinamentoDetailLinks(dto);
             return dto;
         });
 
-        // Cria link de página raiz
         Link findAllLink = WebMvcLinkBuilder.linkTo(
                 methodOn(TreinamentoController.class).findAll(
                         pageable.getPageNumber(),
@@ -139,8 +134,9 @@ public class TreinamentoService {
                 )
         ).withSelfRel();
 
-        // Converte para PagedModel
-        return assembler.toModel(funcionariosDTOPage, findAllLink);
+        var result = assembler.toModel(funcionariosDTOPage, findAllLink);
+        HateoasLinkManager.addTreinamentoListPageLinks(result);
+        return result;
     }
 
     public PagedModel<EntityModel<TreinamentoDTO>> findByStatus(
@@ -148,27 +144,25 @@ public class TreinamentoService {
 
         logger.info("Procurando treinamentos por status");
 
-        // Busca a página de entidades
         Page<Treinamento> treinamentoPage = repository.findByStatus(status, pageable);
 
-        // Converte para DTO e adiciona links
         Page<TreinamentoDTO> funcionariosDTOPage = treinamentoPage.map(treinamento -> {
             TreinamentoDTO dto = parseObject(treinamento, TreinamentoDTO.class);
-            addHateosLinks(dto);
+            HateoasLinkManager.addTreinamentoDetailLinks(dto);
             return dto;
         });
 
-        // Cria link de página raiz
         Link findAllLink = WebMvcLinkBuilder.linkTo(
-                methodOn(FuncionarioController.class).findAll(
+                methodOn(TreinamentoController.class).findAll(
                         pageable.getPageNumber(),
                         pageable.getPageSize(),
                         String.valueOf(pageable.getSort())
                 )
         ).withSelfRel();
 
-        // Converte para PagedModel
-        return assembler.toModel(funcionariosDTOPage, findAllLink);
+        var result = assembler.toModel(funcionariosDTOPage, findAllLink);
+        HateoasLinkManager.addTreinamentoListPageLinks(result);
+        return result;
     }
 
     public PagedModel<EntityModel<TreinamentoDTO>> findTreinamentoExpiring(
@@ -176,10 +170,8 @@ public class TreinamentoService {
 
         logger.info("Procurando treinamentos expirando entre datas");
 
-        // Busca a página de entidades
         Page<Treinamento> treinamentoPage = repository.findTreinamentoExpiring(startDate, endDate, pageable);
 
-        // Converte para DTO e adiciona links
         Page<TreinamentoDTO> treinamentoPageDTO = treinamentoPage.map(treinamento -> {
             TreinamentoDTO dto = parseObject(treinamento, TreinamentoDTO.class);
             if(treinamento.getFuncionario() != null){
@@ -189,32 +181,30 @@ public class TreinamentoService {
                 dto.setCursoId(treinamento.getCurso().getId());
                 dto.setCursoNome(treinamento.getCurso().getNome());
             }
-            addHateosLinks(dto);
+            HateoasLinkManager.addTreinamentoDetailLinks(dto);
             return dto;
         });
 
-        // Cria link de página raiz
         Link findAllLink = WebMvcLinkBuilder.linkTo(
-                methodOn(FuncionarioController.class).findAll(
+                methodOn(TreinamentoController.class).findAll(
                         pageable.getPageNumber(),
                         pageable.getPageSize(),
                         String.valueOf(pageable.getSort())
                 )
         ).withSelfRel();
 
-        // Converte para PagedModel
-        return assembler.toModel(treinamentoPageDTO, findAllLink);
+        var result = assembler.toModel(treinamentoPageDTO, findAllLink);
+        HateoasLinkManager.addTreinamentoListPageLinks(result);
+        return result;
     }
 
     public PagedModel<EntityModel<TreinamentoDTO>> findTreinamentoConluded(
             LocalDate startDate, LocalDate endDate, Pageable pageable) {
 
-        logger.info("Procurando treinamentos expirando entre datas");
+        logger.info("Procurando treinamentos concluídos entre datas");
 
-        // Busca a página de entidades
         Page<Treinamento> treinamentoPage = repository.findTreinamentoConluded(startDate, endDate, pageable);
 
-        // Converte para DTO e adiciona links
         Page<TreinamentoDTO> treinamentoPageDTO = treinamentoPage.map(treinamento -> {
             TreinamentoDTO dto = parseObject(treinamento, TreinamentoDTO.class);
             if(treinamento.getFuncionario() != null){
@@ -224,53 +214,48 @@ public class TreinamentoService {
                 dto.setCursoId(treinamento.getCurso().getId());
                 dto.setCursoNome(treinamento.getCurso().getNome());
             }
-            addHateosLinks(dto);
+            HateoasLinkManager.addTreinamentoDetailLinks(dto);
             return dto;
         });
 
-        // Cria link de página raiz
         Link findAllLink = WebMvcLinkBuilder.linkTo(
-                methodOn(FuncionarioController.class).findAll(
+                methodOn(TreinamentoController.class).findAll(
                         pageable.getPageNumber(),
                         pageable.getPageSize(),
                         String.valueOf(pageable.getSort())
                 )
         ).withSelfRel();
 
-        // Converte para PagedModel
-        return assembler.toModel(treinamentoPageDTO, findAllLink);
+        var result = assembler.toModel(treinamentoPageDTO, findAllLink);
+        HateoasLinkManager.addTreinamentoListPageLinks(result);
+        return result;
     }
 
     public PagedModel<EntityModel<TreinamentoDTO>> findTreinamentosByFuncionario(
             long id, Pageable pageable) {
 
-        logger.info("Procurando todos os treinamentos de um funcionário especifico");
+        logger.info("Procurando todos os treinamentos de um funcionário específico");
 
-        // Busca a página de entidades
         Page<Treinamento> treinamentoPage = repository.findTreinamentosByFuncionario(id, pageable);
 
-        // Converte para DTO e adiciona links
         Page<TreinamentoDTO> treinamentoPageDTO = treinamentoPage.map(credencial -> {
             TreinamentoDTO dto = parseObject(credencial, TreinamentoDTO.class);
-            addHateosLinks(dto);
+            HateoasLinkManager.addTreinamentoDetailLinks(dto);
             return dto;
         });
 
-        // Cria link de página raiz
         Link findAllLink = WebMvcLinkBuilder.linkTo(
-                methodOn(FuncionarioController.class).findAll(
+                methodOn(TreinamentoController.class).findAll(
                         pageable.getPageNumber(),
                         pageable.getPageSize(),
                         String.valueOf(pageable.getSort())
                 )
         ).withSelfRel();
 
-        // Converte para PagedModel
-        return assembler.toModel(treinamentoPageDTO, findAllLink);
+        var result = assembler.toModel(treinamentoPageDTO, findAllLink);
+        HateoasLinkManager.addTreinamentoListPageLinks(result);
+        return result;
     }
-
-
-
 
     public Treinamento create(Treinamento treinamento) {
         logger.info("Criando um novo registro de treinamento no banco");
@@ -282,7 +267,6 @@ public class TreinamentoService {
         Curso curso = cursoRepository.findById(treinamento.getCurso().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Curso não encontrado"));
 
-        // Cria a entidade
         Treinamento entity = new Treinamento();
         entity.setFuncionario(funcionario);
         entity.setCurso(curso);
@@ -292,10 +276,9 @@ public class TreinamentoService {
         entity.setInstrutor(treinamento.getInstrutor());
         entity.setStatus(treinamento.getStatus());
 
-        // Salva e converte para DTO
         Treinamento savedEntity = repository.save(entity);
         var dto = parseObject(savedEntity, TreinamentoDTO.class);
-        addHateosLinks(dto);
+        HateoasLinkManager.addTreinamentoDetailLinks(dto);
 
         return repository.save(entity);
     }
@@ -322,11 +305,10 @@ public class TreinamentoService {
             dto.setCursoId(entity.getCurso().getId());
             dto.setCursoNome(entity.getCurso().getNome());
         }
-        addHateosLinks(dto);
+        HateoasLinkManager.addTreinamentoDetailLinks(dto);
 
         return dto;
     }
-
 
     public void delete(long id) {
         logger.info(String.format("Apagando um treinamento do banco"));
@@ -343,14 +325,12 @@ public class TreinamentoService {
                 .map(treinamento -> {
                     TreinamentoDTO dto = parseObject(treinamento, TreinamentoDTO.class);
 
-                    // Popula os dados do funcionário
                     if (treinamento.getFuncionario() != null) {
                         dto.setFuncionarioId(treinamento.getFuncionario().getId());
                         dto.setFuncionarioNome(treinamento.getFuncionario().getNome());
                         dto.setFuncionarioMatricula(treinamento.getFuncionario().getMatricula());
                     }
 
-                    // Popula os dados do curso
                     if (treinamento.getCurso() != null) {
                         dto.setCursoId(treinamento.getCurso().getId());
                         dto.setCursoNome(treinamento.getCurso().getNome());
@@ -369,15 +349,6 @@ public class TreinamentoService {
         }
     }
 
-
-
-    private static void addHateosLinks(TreinamentoDTO dto) {
-        dto.add(linkTo(methodOn(TreinamentoController.class).findById(dto.getId())).withSelfRel().withType("GET"));
-        dto.add(linkTo(methodOn(TreinamentoController.class).delete(dto.getId())).withRel("delete").withType("GET"));
-        dto.add(linkTo(methodOn(TreinamentoController.class).create(parseObject(dto, Treinamento.class))).withRel("create").withType("POST"));
-        dto.add(linkTo(methodOn(TreinamentoController.class).update(dto)).withRel("update").withType("PUT"));
-        dto.add(linkTo(methodOn(TreinamentoController.class).exportPage(1, 12, "asc", null)).withRel("exportPage").withType("GET"));
-    }
     private TreinamentoStatus calcularStatus(LocalDate dataVencimento) {
         LocalDate hoje = LocalDate.now();
         if (hoje.isAfter(dataVencimento)) {
@@ -389,7 +360,7 @@ public class TreinamentoService {
         }
     }
 
-    @Scheduled(cron = "0 0 0 * * ?") // todo dia à meia-noite
+    @Scheduled(cron = "0 0 0 * * ?")
     public void atualizarStatusTreinamentos() {
         List<Treinamento> treinamentos = repository.findAll();
         for (Treinamento t : treinamentos) {
@@ -399,4 +370,3 @@ public class TreinamentoService {
     }
 
 }
-

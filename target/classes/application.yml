@@ -3,6 +3,11 @@ cors:
     patterns: http://localhost:8080,http://localhost:3000,https://www.example.com
 file:
   upload-dir: /home/bverly/Downloads/downloads_projeto_spring
+security:
+  jwt:
+    token:
+        secret-key: 53cr3t7
+        expire-length: 3600000 # 1 hora em milliseconds
 email:
   subject: "Default Subject"
   message: "Default Message"
@@ -43,7 +48,7 @@ spring:
       max-request-size: 200MB
 logging:
   level:
-    root: DEBUG
+    root: WARN
 
 
   spring-doc:

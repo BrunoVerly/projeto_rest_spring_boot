@@ -2,10 +2,12 @@ package com.example.projetoRestSpringBoot.controller;
 
 import com.example.projetoRestSpringBoot.controller.docs.CredencialControllerDocs;
 import com.example.projetoRestSpringBoot.dto.CredencialDTO;
+import com.example.projetoRestSpringBoot.dto.IntervaloDataDTO;
 import com.example.projetoRestSpringBoot.enums.CredencialStatus;
 import com.example.projetoRestSpringBoot.file.exporter.MediaTypes;
 import com.example.projetoRestSpringBoot.model.Credencial;
-import com.example.projetoRestSpringBoot.services.CredencialService;
+import com.example.projetoRestSpringBoot.service.CredencialService;
+import com.example.projetoRestSpringBoot.service.linkhateoas.HateoasLinkManager;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -20,11 +22,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-import java.util.Map;
-
 @RestController
-@RequestMapping("/credencial/v1")
+@RequestMapping("/api/credencial/v1")
 public class CredencialController implements CredencialControllerDocs {
     @Autowired
     private CredencialService service;
@@ -37,24 +36,24 @@ public class CredencialController implements CredencialControllerDocs {
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
             @RequestParam(value = "direction", defaultValue = "asc") String direction
-            ) {
+    ) {
         var sortDirection = "desc".equalsIgnoreCase(direction) ? Direction.DESC : Direction.ASC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, "id"));
-        return ResponseEntity.ok(service.findAll(pageable));
+        var result = service.findAll(pageable);
+        return ResponseEntity.ok(result);
     }
 
 
-    @GetMapping(value = "buscarPorId/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_YAML_VALUE})
+    @GetMapping(value = "/buscarPorId/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_YAML_VALUE})
     @Override
     public CredencialDTO findById (@PathVariable("id") long id) {
-        var credencial = service.findById(id);
-        return credencial;
+        return service.findById(id);
     }
 
     @PostMapping(consumes = {
-                    MediaType.APPLICATION_JSON_VALUE,
-                    MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_YAML_VALUE},
-                produces = {
+            MediaType.APPLICATION_JSON_VALUE,
+            MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_YAML_VALUE},
+            produces = {
                     MediaType.APPLICATION_JSON_VALUE,
                     MediaType.APPLICATION_XML_VALUE,
                     MediaType.APPLICATION_YAML_VALUE})
@@ -77,51 +76,48 @@ public class CredencialController implements CredencialControllerDocs {
     ) {
         var sortDirection = "desc".equalsIgnoreCase(direction) ? Direction.DESC : Direction.ASC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, "dataVencimento"));
-        return ResponseEntity.ok(service.findByStatus(status, pageable));
+        var result = service.findByStatus(status, pageable);
+        return ResponseEntity.ok(result);
     }
 
 
-    @GetMapping(value = "/buscarPorVencimento",
+    @PostMapping(value = "/buscarPorVencimento",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_YAML_VALUE})
+    @Override
     public ResponseEntity<PagedModel<EntityModel<CredencialDTO>>> findCredencialExpiring(
-            @RequestBody Map<String, String> body,
+            @RequestBody IntervaloDataDTO intervalo,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
             @RequestParam(value = "direction", defaultValue = "asc") String direction) {
-
-        LocalDate startDate = body.containsKey("startDate") ? LocalDate.parse(body.get("startDate")) : LocalDate.now();
-        LocalDate endDate = body.containsKey("endDate") ? LocalDate.parse(body.get("endDate")) : LocalDate.now();
 
         var sortDirection = "desc".equalsIgnoreCase(direction) ? Direction.DESC : Direction.ASC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, "dataVencimento"));
-        return ResponseEntity.ok(service.findCredencialExpiring(startDate, endDate, pageable));
-
+        var result = service.findCredencialExpiring(intervalo.getStartDate(), intervalo.getEndDate(), pageable);
+        return ResponseEntity.ok(result);
     }
 
-    @GetMapping(value = "/buscarPorEmissao",
+    @PostMapping(value = "/buscarPorEmissao",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_YAML_VALUE})
+    @Override
     public ResponseEntity<PagedModel<EntityModel<CredencialDTO>>> findCredencialEmited(
-            @RequestBody Map<String, String> body,
+            @RequestBody IntervaloDataDTO intervalo,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
             @RequestParam(value = "direction", defaultValue = "asc") String direction) {
 
-        LocalDate startDate = body.containsKey("startDate") ? LocalDate.parse(body.get("startDate")) : LocalDate.now();
-        LocalDate endDate = body.containsKey("endDate") ? LocalDate.parse(body.get("endDate")) : LocalDate.now();
-
         var sortDirection = "desc".equalsIgnoreCase(direction) ? Direction.DESC : Direction.ASC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, "dataEmissao"));
-        return ResponseEntity.ok(service.findCredencialEmited(startDate, endDate, pageable));
-
+        var result = service.findCredencialEmited(intervalo.getStartDate(), intervalo.getEndDate(), pageable);
+        return ResponseEntity.ok(result);
     }
 
     @PutMapping(consumes = {
-                    MediaType.APPLICATION_JSON_VALUE,
-                    MediaType.APPLICATION_XML_VALUE,
-                    MediaType.APPLICATION_YAML_VALUE},
-                produces = {
+            MediaType.APPLICATION_JSON_VALUE,
+            MediaType.APPLICATION_XML_VALUE,
+            MediaType.APPLICATION_YAML_VALUE},
+            produces = {
                     MediaType.APPLICATION_JSON_VALUE,
                     MediaType.APPLICATION_XML_VALUE,
                     MediaType.APPLICATION_YAML_VALUE})

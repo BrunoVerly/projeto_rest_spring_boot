@@ -1,4 +1,4 @@
-package com.example.projetoRestSpringBoot.services;
+package com.example.projetoRestSpringBoot.service;
 
 import com.example.projetoRestSpringBoot.controller.FuncionarioController;
 import com.example.projetoRestSpringBoot.dto.FuncionarioDTO;
@@ -26,16 +26,14 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.File;
-import java.io.IOException;
+import com.example.projetoRestSpringBoot.service.linkhateoas.HateoasLinkManager;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
-
 import static com.example.projetoRestSpringBoot.mapper.ObjectMapper.parseObject;
+import static com.example.projetoRestSpringBoot.service.linkhateoas.HateoasLinkManager.addFuncionarioDetailLinks;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
@@ -61,7 +59,7 @@ public class FuncionarioService {
         var people = repository.findAll(pageable);
         Page<FuncionarioDTO> peopleWithLinks = people.map(dto -> {
             FuncionarioDTO person = parseObject(dto, FuncionarioDTO.class);
-            addHateosLinksForList(person);
+            addFuncionarioDetailLinks(person);
             return person;
         });
         Link findAllLink = WebMvcLinkBuilder.linkTo(
@@ -71,7 +69,9 @@ public class FuncionarioService {
                         String.valueOf(pageable.getSort())
                 )
         ).withSelfRel();
-        return assembler.toModel(peopleWithLinks, findAllLink);
+        var pagedModel = assembler.toModel(peopleWithLinks, findAllLink);
+        return pagedModel;
+
     }
 
     public PagedModel<EntityModel<FuncionarioDTO>> findByName(String nome, Pageable pageable) {
@@ -80,7 +80,7 @@ public class FuncionarioService {
         var funcionarios = repository.findFuncionarioByName(nome, pageable);
         var funcionariosLinks = funcionarios.map(dto -> {
             var funcionario = parseObject(dto, FuncionarioDTO.class);
-            addHateosLinksForList(funcionario);
+            addFuncionarioDetailLinks(funcionario);
             return funcionario;
         });
         Link findAllLink = WebMvcLinkBuilder.linkTo(
@@ -90,7 +90,9 @@ public class FuncionarioService {
                         String.valueOf(pageable.getSort())
                 )
         ).withSelfRel();
-        return assembler.toModel(funcionariosLinks, findAllLink);
+        var pagedModel = assembler.toModel(funcionariosLinks, findAllLink);
+        return pagedModel;
+
     }
 
     public PagedModel<EntityModel<FuncionarioDTO>> findByNome(String nome, Pageable pageable) {
@@ -104,7 +106,7 @@ public class FuncionarioService {
                 .orElseThrow(() -> new ResourceNotFoundException("Id nao encontrado"));
 
         var dto = parseObject(entity, FuncionarioDTO.class);
-        addHateosLinksForDetail(dto);
+        addFuncionarioDetailLinks(dto);
         return dto;
     }
 
@@ -115,7 +117,7 @@ public class FuncionarioService {
                 .orElseThrow(() -> new ResourceNotFoundException("Matricula nao encontrada"));
 
         var dto = parseObject(entity, FuncionarioDTO.class);
-        addHateosLinksForDetail(dto);
+        addFuncionarioDetailLinks(dto);
         return dto;
     }
 
@@ -128,7 +130,7 @@ public class FuncionarioService {
 
         Page<FuncionarioDTO> funcionariosDTOPage = funcionariosPage.map(funcionario -> {
             FuncionarioDTO dto = parseObject(funcionario, FuncionarioDTO.class);
-            addHateosLinksForList(dto);
+            addFuncionarioDetailLinks(dto);
             return dto;
         });
 
@@ -139,7 +141,8 @@ public class FuncionarioService {
                         String.valueOf(pageable.getSort())
                 )
         ).withSelfRel();
-        return assembler.toModel(funcionariosDTOPage, findAllLink);
+        var pagedModel = assembler.toModel(funcionariosDTOPage, findAllLink);
+        return pagedModel;
     }
 
     public Funcionario create(Funcionario funcionario) {
@@ -148,7 +151,7 @@ public class FuncionarioService {
         if (funcionario == null) throw new RequiredObjectIsNullException();
         var entity = parseObject(funcionario, Funcionario.class);
         var dto = parseObject(repository.save(entity), FuncionarioDTO.class);
-        addHateosLinksForDetail(dto);
+        addFuncionarioDetailLinks(dto);
         return repository.save(entity);
     }
 
@@ -171,7 +174,7 @@ public class FuncionarioService {
         entity.setTelefone(funcionario.getTelefone());
 
         var dto = parseObject(repository.save(entity), FuncionarioDTO.class);
-        addHateosLinksForDetail(dto);
+        addFuncionarioDetailLinks(dto);
         return dto;
     }
 
@@ -200,7 +203,7 @@ public class FuncionarioService {
 
         Page<FuncionarioDTO> funcionariosDTOPage = funcionariosPage.map(funcionario -> {
             FuncionarioDTO dto = parseObject(funcionario, FuncionarioDTO.class);
-            addHateosLinksForList(dto);
+            addFuncionarioDetailLinks(dto);
             return dto;
         });
 
@@ -212,8 +215,10 @@ public class FuncionarioService {
                 )
         ).withSelfRel();
 
-        return assembler.toModel(funcionariosDTOPage, findAllLink);
+        var pagedModel = assembler.toModel(funcionariosDTOPage, findAllLink);
+        return pagedModel;
     }
+
 
     public void delete(long id) {
         logger.info(String.format("Apagando um funcionario do banco"));
@@ -221,20 +226,6 @@ public class FuncionarioService {
         Funcionario entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Id nao encontrado no banco"));
         repository.delete(entity);
-    }
-
-    private static void addHateosLinksForDetail(FuncionarioDTO dto) {
-        dto.add(linkTo(methodOn(FuncionarioController.class).findById(dto.getId())).withSelfRel().withType("GET"));
-        dto.add(linkTo(methodOn(FuncionarioController.class).delete(dto.getId())).withRel("delete").withType("DELETE"));
-        dto.add(linkTo(methodOn(FuncionarioController.class).update(dto)).withRel("update").withType("PUT"));
-        dto.add(linkTo(methodOn(FuncionarioController.class).findBySituacao(dto.getSituacao(), 0, 12, "asc")).withRel("situacao").withType("GET"));
-        dto.add(linkTo(methodOn(FuncionarioController.class).findAll(0, 12, "asc")).withRel("findAll").withType("GET"));
-    }
-
-    private static void addHateosLinksForList(FuncionarioDTO dto) {
-        dto.add(linkTo(methodOn(FuncionarioController.class).findById(dto.getId())).withSelfRel().withType("GET"));
-        dto.add(linkTo(methodOn(FuncionarioController.class).delete(dto.getId())).withRel("delete").withType("DELETE"));
-        dto.add(linkTo(methodOn(FuncionarioController.class)).withRel("create").withType("POST"));
     }
 
     public List<FuncionarioDTO> importarArquivo(MultipartFile file) {
@@ -252,7 +243,7 @@ public class FuncionarioService {
             return entities.stream()
                     .map(entity -> {
                         var dto = parseObject(entity, FuncionarioDTO.class);
-                        addHateosLinksForDetail(dto);
+                        addFuncionarioDetailLinks(dto);
                         return dto;
                     })
                     .toList();

@@ -2,6 +2,11 @@ server:
   port: 8888
 file:
  upload-dir: /home/bverly/Downloads/downloads_projeto_spring
+security:
+  jwt:
+    token:
+      secret-key: 53cr3t7
+      expire-length: 3600000 # 1 hora em milliseconds
 email:
   subject: "Default Subject"
   message: "Default Message"

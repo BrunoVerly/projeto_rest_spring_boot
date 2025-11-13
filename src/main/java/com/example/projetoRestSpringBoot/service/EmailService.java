@@ -1,4 +1,4 @@
-package com.example.projetoRestSpringBoot.services;
+package com.example.projetoRestSpringBoot.service;
 
 import com.example.projetoRestSpringBoot.config.EmailConfig;
 import com.example.projetoRestSpringBoot.dto.request.EmailRequestDTO;

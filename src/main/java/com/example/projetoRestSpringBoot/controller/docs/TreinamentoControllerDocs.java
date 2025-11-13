@@ -1,6 +1,7 @@
 package com.example.projetoRestSpringBoot.controller.docs;
 
 import com.example.projetoRestSpringBoot.dto.FuncionarioDTO;
+import com.example.projetoRestSpringBoot.dto.IntervaloDataDTO;
 import com.example.projetoRestSpringBoot.dto.TreinamentoDTO;
 import com.example.projetoRestSpringBoot.enums.TreinamentoStatus;
 import com.example.projetoRestSpringBoot.model.Treinamento;
@@ -167,7 +168,7 @@ public interface TreinamentoControllerDocs {
                     @ApiResponse(description = "Internal error", responseCode = "500", content = @Content),
             })
     ResponseEntity<PagedModel<EntityModel<TreinamentoDTO>>> findTreinamentoConluded(
-            @RequestBody Map<String, String> body,
+            @RequestBody IntervaloDataDTO intervalo,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "12") int size,
             @RequestParam(value = "direction", defaultValue = "asc") String direction
@@ -193,7 +194,7 @@ public interface TreinamentoControllerDocs {
                     @ApiResponse(description = "Internal error", responseCode = "500", content = @Content),
             })
     ResponseEntity<PagedModel<EntityModel<TreinamentoDTO>>> findTreinamentoExpiring(
-            @RequestBody Map<String, String> body,
+            @RequestBody IntervaloDataDTO intervalo,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "12") int size,
             @RequestParam(value = "direction", defaultValue = "asc") String direction

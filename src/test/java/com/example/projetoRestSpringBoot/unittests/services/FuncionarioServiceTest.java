@@ -5,7 +5,7 @@ import com.example.projetoRestSpringBoot.file.exporter.contract.FileExporter;
 import com.example.projetoRestSpringBoot.file.exporter.factory.FileExporterFactory;
 import com.example.projetoRestSpringBoot.model.Funcionario;
 import com.example.projetoRestSpringBoot.repository.FuncionarioRepository;
-import com.example.projetoRestSpringBoot.services.FuncionarioService;
+import com.example.projetoRestSpringBoot.service.FuncionarioService;
 import com.example.projetoRestSpringBoot.unittests.mocks.MockFuncionario;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
