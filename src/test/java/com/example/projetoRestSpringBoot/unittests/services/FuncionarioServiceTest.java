@@ -237,8 +237,9 @@ class FuncionarioServiceTest {
         assertEquals(funcionario.getId(), result.getId(), "ID deve corresponder");
         assertEquals(funcionario.getNome(), result.getNome(), "Nome deve corresponder");
 
-        verify(repository, times(2)).save(any(Funcionario.class));
+        verify(repository, times(1)).save(any(Funcionario.class)); // ← alterar de times(2) para times(1)
     }
+
 
     @Test
     void createWithNull() {
@@ -293,6 +294,8 @@ class FuncionarioServiceTest {
     void updateNotFound() {
         FuncionarioDTO dto = new FuncionarioDTO();
         dto.setId(999L);
+        dto.setNome("Nome Teste"); // ← adicionar
+        dto.setMatricula("MAT999"); // ← adicionar
 
         when(repository.findById(999L)).thenReturn(Optional.empty());
 

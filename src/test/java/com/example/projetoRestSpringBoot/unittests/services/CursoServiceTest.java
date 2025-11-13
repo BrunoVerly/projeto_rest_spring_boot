@@ -192,6 +192,7 @@ class CursoServiceTest {
     void updateNotFound() {
         CursoDTO dto = new CursoDTO();
         dto.setId(999L);
+        dto.setNome("Curso Teste"); // ← adicionar campo obrigatório
 
         when(repository.findById(999L)).thenReturn(Optional.empty());
 

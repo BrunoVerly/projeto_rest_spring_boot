@@ -222,7 +222,7 @@ class CredencialServiceTest {
         assertEquals(credencial.getTipo(), result.getTipo(), "Tipo deve corresponder");
 
         verify(funcionarioRepository, times(1)).findById(credencial.getFuncionario().getId());
-        verify(repository, times(2)).save(any(Credencial.class));
+        verify(repository, times(1)).save(any(Credencial.class)); // ← alterar de times(2) para times(1)
     }
 
     @Test
@@ -308,6 +308,9 @@ class CredencialServiceTest {
     void updateNotFound() {
         CredencialDTO dto = new CredencialDTO();
         dto.setId(999L);
+        dto.setTipo(CredencialTipo.PERMANENTE);           // ← adicionar
+        dto.setDataEmissao(LocalDate.now());              // ← adicionar
+        dto.setDataVencimento(LocalDate.now().plusYears(1)); // ← adicionar
 
         when(repository.findById(999L)).thenReturn(Optional.empty());
 

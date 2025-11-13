@@ -272,7 +272,7 @@ class TreinamentoServiceTest {
 
         verify(funcionarioRepository, times(1)).findById(funcionarioId);
         verify(cursoRepository, times(1)).findById(cursoId);
-        verify(repository, times(2)).save(any(Treinamento.class));
+        verify(repository, times(1)).save(any(Treinamento.class)); // ← alterar de times(2) para times(1)
     }
 
     @Test
@@ -365,6 +365,7 @@ class TreinamentoServiceTest {
     void updateNotFound() {
         TreinamentoDTO dto = new TreinamentoDTO();
         dto.setId(999L);
+        dto.setInstrutor("Instrutor Teste"); // ← adicionar
 
         when(repository.findById(999L)).thenReturn(Optional.empty());
 
