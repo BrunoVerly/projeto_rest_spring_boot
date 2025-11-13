@@ -3,6 +3,7 @@ name: CI CD com GitHub Actions
 on:
   push:
     branches: [ "master" ]
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -24,16 +25,25 @@ jobs:
           cache: maven
 
       - name: Build Application .jar
-        working-directory: ./
         run: mvn clean package
 
       - name: Docker Compose Build
-        working-directory: ./
         run: docker compose build
 
-      - name: Push to Docker Hub Container Registry
+      - name: Push Docker Images
         run: |
           docker tag ${{ secrets.DOCKER_USERNAME }}/projeto_rest_spring_boot:latest ${{ secrets.DOCKER_USERNAME }}/projeto_rest_spring_boot:${{ github.run_id }}
           docker push ${{ secrets.DOCKER_USERNAME }}/projeto_rest_spring_boot:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/projeto_rest_spring_boot:${{ github.run_id }}
-      
+
+      - name: Deploy to Azure VM
+        uses: appleboy/ssh-action@v0.1.9
+        with:
+          host: ${{ secrets.AZURE_VM_IP }}
+          username: ${{ secrets.AZURE_VM_USER }}
+          key: ${{ secrets.AZURE_VM_SSH_KEY }}
+          port: 22
+          script: |
+            cd /home/azureuser/projeto_rest_spring_boot
+            docker compose pull
+            docker compose up -d
