@@ -23,7 +23,7 @@ public class EmailService {
         emailSender
                 .to(emailRequest.getTo())
                 .withSubject(emailRequest.getSubject())
-                .withMessage(emailRequest.getSubject())
+                .withMessage(emailRequest.getBody())
                 .send(emailConfig);
     }
 
@@ -37,7 +37,7 @@ public class EmailService {
             emailSender
                     .to(emailRequest.getTo())
                     .withSubject(emailRequest.getSubject())
-                    .withMessage(emailRequest.getSubject())
+                    .withMessage(emailRequest.getBody())
                     .attach(tempFile.getAbsolutePath())
                     .send(emailConfig);
 
@@ -51,10 +51,5 @@ public class EmailService {
                 tempFile.delete();
             }
         }
-
-
     }
-
-
-
 }

@@ -23,6 +23,7 @@ services:
     build: .
     image: brunoverly/projeto_rest_spring_boot
     restart: always
+    env_file: .env
     environment:
       SERVER_PORT: 80
       TZ: America/Sao_Paulo

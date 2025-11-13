@@ -20,8 +20,6 @@ import java.util.StringTokenizer;
 public class EmailSender implements Serializable {
     Logger logger = LoggerFactory.getLogger(EmailSender.class);
 
-
-
     private final JavaMailSender mailSender;
     private String to;
     private String subject;
@@ -39,8 +37,6 @@ public class EmailSender implements Serializable {
         return this;
     }
 
-
-
     public EmailSender withSubject(String subject) {
         this.subject = subject;
         return this;
@@ -55,6 +51,7 @@ public class EmailSender implements Serializable {
         this.attachment = new File(fileDir);
         return this;
     }
+
     public void send(EmailConfig config) {
         MimeMessage message = mailSender.createMimeMessage();
         try {
@@ -69,7 +66,7 @@ public class EmailSender implements Serializable {
             mailSender.send(message);
             logger.info("Sent email to " + to);
             reset();
-            
+
         } catch (MessagingException e) {
             throw new RuntimeException("Error trying to send the email", e);
         }
@@ -79,7 +76,7 @@ public class EmailSender implements Serializable {
         this.to = null;
         this.subject = null;
         this.body = null;
-        this.recipients = null;
+        this.recipients = new ArrayList<>();
         this.attachment = null;
     }
 
