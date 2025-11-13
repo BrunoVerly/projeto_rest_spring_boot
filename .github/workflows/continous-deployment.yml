@@ -33,6 +33,6 @@ jobs:
 
       - name: Push to Docker Hub Container Registry
         run: |
-          docker tag ${{ secrets.DOCKER_USERNAME }}/projeto_rest_spring_boot:latest brunoverly/projeto_rest_spring_boot:ghjid
+          docker tag ${{ secrets.DOCKER_USERNAME }}/projeto_rest_spring_boot:${{ github.run_id }}
           docker push ${{ secrets.DOCKER_USERNAME }}/projeto_rest_spring_boot:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/projeto_rest_spring_boot:${{ github.run_id }}
