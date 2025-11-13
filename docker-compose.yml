@@ -27,6 +27,8 @@ services:
       SERVER_PORT: 80
       TZ: America/Sao_Paulo
       SPRING_PROFILES_ACTIVE: docker
+      EMAIL_USERNAME: ${EMAIL_USERNAME}
+      EMAIL_PASSWORD: ${EMAIL_PASSWORD}
     depends_on:
       db:
         condition: service_healthy
