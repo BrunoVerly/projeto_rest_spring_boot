@@ -24,6 +24,9 @@ services:
     image: brunoverly/projeto_rest_spring_boot
     restart: always
     environment:
+      EMAIL_USERNAME: ${EMAIL_USERNAME}
+      EMAIL_PASSWORD: ${EMAIL_PASSWORD}
+      SERVER_PORT: 80
       TZ: America/Sao_Paulo
       SPRING_PROFILES_ACTIVE: docker
     depends_on:
