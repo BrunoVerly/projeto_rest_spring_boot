@@ -4,3 +4,14 @@ spring:
     url: jdbc:mysql://db:3306/projeto_rest_spring_boot?useTimezone=true&serverTimezone=UTC
     username: docker
     password: admin123
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+  flyway:
+    enabled: false  # 👈 DESABILITE FLYWAY TEMPORARIAMENTE
+server:
+  port: 80

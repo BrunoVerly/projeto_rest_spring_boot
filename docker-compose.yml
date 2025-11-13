@@ -1,6 +1,6 @@
 services:
   db:
-    image: mysql:9.1.0
+    image: mysql:8.0
     restart: always
     environment:
       TZ: America/Sao_Paulo
@@ -12,6 +12,12 @@ services:
       - "3308:3306"
     networks:
       - mynetwork
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: --max-connections=1000 --default-authentication-plugin=mysql_native_password
 
   projeto_rest_spring_boot:
     build: .
@@ -19,13 +25,21 @@ services:
     restart: always
     environment:
       TZ: America/Sao_Paulo
-      SPRING_PROFILES_ACTIVE: docker  # 👈 isso é a chave
+      SPRING_PROFILES_ACTIVE: docker
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     ports:
       - "80:80"
     networks:
       - mynetwork
+    # Adicione isto para dar mais tempo ao Spring iniciar
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
 
 networks:
   mynetwork:

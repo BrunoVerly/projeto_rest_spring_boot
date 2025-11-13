@@ -48,7 +48,7 @@ spring:
       max-request-size: 200MB
 logging:
   level:
-    root: WARN
+    root: INFO
 
 
   spring-doc:
