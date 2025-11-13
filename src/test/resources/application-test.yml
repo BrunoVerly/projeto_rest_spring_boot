@@ -1,35 +1,44 @@
 server:
   port: 8888
+
 file:
- upload-dir: /home/bverly/Downloads/downloads_projeto_spring
+  upload-dir: /tmp/downloads_projeto_spring
+
 security:
   jwt:
     token:
       secret-key: 53cr3t7
-      expire-length: 3600000 # 1 hora em milliseconds
+      expire-length: 3600000
+
 email:
   subject: "Default Subject"
   message: "Default Message"
-cors:
-  origins:
-    patterns: http://localhost:8080,http://localhost:3000,https://www.example.com
+
 spring:
   application:
     name: projeto_rest_spring_boot
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:testdb
+    username: sa
+    password:
+  flyway:
+    enabled: false
+  jackson:
+    date-format: yyyy-MM-dd
+    serialization:
+      write-dates-as-timestamps: false
   jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
-      ddl-auto: update
-    properties:
-      hibernate:
+      ddl-auto: create-drop
     show-sql: false
     open-in-view: false
   mail:
     host: smtp.gmail.com
     port: 587
-    username: ${EMAIL_USERNAME}
-    password: ${EMAIL_PASSWORD}
+    username: ${EMAIL_USERNAME:test@example.com}
+    password: ${EMAIL_PASSWORD:testpass}
     properties:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
@@ -40,14 +49,12 @@ spring:
       file-size-threshold: 2KB
       max-file-size: 200MB
       max-request-size: 200MB
+
 logging:
   level:
     root: WARN
 
-  spring-doc:
-    paths-to-match: /api/**/v1/**
-    swagger-ui:
-      use-root-path: true
-
-
-
+spring-doc:
+  paths-to-match: /api/**/v1/**
+  swagger-ui:
+    use-root-path: true
