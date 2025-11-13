@@ -1,0 +1,45 @@
+# Compilação e build
+target/
+out/
+build/
+
+# Arquivos de dependências
+*.class
+*.jar
+*.war
+*.ear
+
+# Logs
+*.log
+
+# Configurações de IDE
+.idea/
+.vscode/
+*.iml
+*.swp
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Arquivos temporários
+*.tmp
+*.bak
+*.old
+
+# Credenciais ou configs locais
+application-local.properties
+application-dev.properties
+.env
+
+# Docker
+*.pid
+docker-compose.override.yml
+
+# Testes e relatórios temporários
+surefire-reports/
+test-output/
+
+# Node (se houver frontend junto)
+node_modules/
+dist/

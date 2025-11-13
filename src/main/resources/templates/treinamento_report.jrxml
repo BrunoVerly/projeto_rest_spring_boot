@@ -1,0 +1,279 @@
+<!-- Created with Jaspersoft Studio version 7.0.3.final using JasperReports Library version 7.0.3-41034ca841d452f3305ba55b9042260aaa1ab5dd  -->
+<jasperReport name="RelatorioTreinamentos" language="java" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="a11e8cc2-d2a5-4edc-8a63-369a22ffa274">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Azure"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<style name="Style1">
+		<conditionalStyle mode="Opaque" backcolor="#E0E0E0">
+			<conditionExpression><![CDATA[$V{REPORT_COUNT} % 2 == 0]]></conditionExpression>
+		</conditionalStyle>
+	</style>
+	<parameter name="ID_FUNCIONARIO" class="java.lang.Long">
+		<defaultValueExpression><![CDATA[1L]]></defaultValueExpression>
+	</parameter>
+	<query language="sql"><![CDATA[SELECT 
+    -- TODOS OS CAMPOS DE TREINAMENTO
+    t.id AS treinamento_id,
+    t.data_agendamento AS treinamento_data_agendamento,
+    t.data_concluido AS treinamento_data_concluido,
+    t.data_vencimento AS treinamento_data_vencimento,
+    t.instrutor AS treinamento_instrutor,
+    t.status AS treinamento_status,
+    t.curso_id AS treinamento_curso_id,
+    t.funcionario_id AS treinamento_funcionario_id,
+    
+    -- TODOS OS CAMPOS DE FUNCIONÁRIO
+    f.id AS funcionario_id,
+    f.cargo AS funcionario_cargo,
+    f.cpf AS funcionario_cpf,
+    f.data_admissao AS funcionario_data_admissao,
+    f.data_nascimento AS funcionario_data_nascimento,
+    f.departamento AS funcionario_departamento,
+    f.email AS funcionario_email,
+    f.matricula AS funcionario_matricula,
+    f.nome AS funcionario_nome,
+    f.rg AS funcionario_rg,
+    f.situacao AS funcionario_situacao,
+    f.telefone AS funcionario_telefone,
+    f.tipo_contrato AS funcionario_tipo_contrato,
+    
+    -- TODOS OS CAMPOS DE CURSO
+    c.id AS curso_id,
+    c.carga_horaria AS curso_carga_horaria,
+    c.descricao AS curso_descricao,
+    c.nome AS curso_nome,
+    c.origem_curso AS curso_origem_curso,
+    c.tipo_obrigatoriedade AS curso_tipo_obrigatoriedade,
+    c.validade_meses AS curso_validade_meses
+    
+FROM projeto_rest_spring_boot.treinamento t
+INNER JOIN projeto_rest_spring_boot.funcionario f 
+    ON t.funcionario_id = f.id
+INNER JOIN projeto_rest_spring_boot.curso c 
+    ON t.curso_id = c.id
+WHERE f.id = $P{ID_FUNCIONARIO}
+ORDER BY t.data_agendamento DESC]]></query>
+	<field name="treinamento_id" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="id"/>
+		<property name="com.jaspersoft.studio.field.label" value="treinamento_id"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="treinamento"/>
+	</field>
+	<field name="treinamento_data_agendamento" class="java.sql.Date">
+		<property name="com.jaspersoft.studio.field.name" value="data_agendamento"/>
+		<property name="com.jaspersoft.studio.field.label" value="treinamento_data_agendamento"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="treinamento"/>
+	</field>
+	<field name="treinamento_data_concluido" class="java.sql.Date">
+		<property name="com.jaspersoft.studio.field.name" value="data_concluido"/>
+		<property name="com.jaspersoft.studio.field.label" value="treinamento_data_concluido"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="treinamento"/>
+	</field>
+	<field name="treinamento_data_vencimento" class="java.sql.Date">
+		<property name="com.jaspersoft.studio.field.name" value="data_vencimento"/>
+		<property name="com.jaspersoft.studio.field.label" value="treinamento_data_vencimento"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="treinamento"/>
+	</field>
+	<field name="treinamento_instrutor" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="instrutor"/>
+		<property name="com.jaspersoft.studio.field.label" value="treinamento_instrutor"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="treinamento"/>
+	</field>
+	<field name="treinamento_status" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="status"/>
+		<property name="com.jaspersoft.studio.field.label" value="treinamento_status"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="treinamento"/>
+	</field>
+	<field name="treinamento_curso_id" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="curso_id"/>
+		<property name="com.jaspersoft.studio.field.label" value="treinamento_curso_id"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="treinamento"/>
+	</field>
+	<field name="treinamento_funcionario_id" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="funcionario_id"/>
+		<property name="com.jaspersoft.studio.field.label" value="treinamento_funcionario_id"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="treinamento"/>
+	</field>
+	<field name="funcionario_id" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="id"/>
+		<property name="com.jaspersoft.studio.field.label" value="funcionario_id"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="funcionario"/>
+	</field>
+	<field name="funcionario_cargo" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="cargo"/>
+		<property name="com.jaspersoft.studio.field.label" value="funcionario_cargo"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="funcionario"/>
+	</field>
+	<field name="funcionario_cpf" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="cpf"/>
+		<property name="com.jaspersoft.studio.field.label" value="funcionario_cpf"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="funcionario"/>
+	</field>
+	<field name="funcionario_data_admissao" class="java.sql.Date">
+		<property name="com.jaspersoft.studio.field.name" value="data_admissao"/>
+		<property name="com.jaspersoft.studio.field.label" value="funcionario_data_admissao"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="funcionario"/>
+	</field>
+	<field name="funcionario_data_nascimento" class="java.sql.Date">
+		<property name="com.jaspersoft.studio.field.name" value="data_nascimento"/>
+		<property name="com.jaspersoft.studio.field.label" value="funcionario_data_nascimento"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="funcionario"/>
+	</field>
+	<field name="funcionario_departamento" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="departamento"/>
+		<property name="com.jaspersoft.studio.field.label" value="funcionario_departamento"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="funcionario"/>
+	</field>
+	<field name="funcionario_email" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="email"/>
+		<property name="com.jaspersoft.studio.field.label" value="funcionario_email"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="funcionario"/>
+	</field>
+	<field name="funcionario_matricula" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="matricula"/>
+		<property name="com.jaspersoft.studio.field.label" value="funcionario_matricula"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="funcionario"/>
+	</field>
+	<field name="funcionario_nome" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="nome"/>
+		<property name="com.jaspersoft.studio.field.label" value="funcionario_nome"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="funcionario"/>
+	</field>
+	<field name="funcionario_rg" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="rg"/>
+		<property name="com.jaspersoft.studio.field.label" value="funcionario_rg"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="funcionario"/>
+	</field>
+	<field name="funcionario_situacao" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="situacao"/>
+		<property name="com.jaspersoft.studio.field.label" value="funcionario_situacao"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="funcionario"/>
+	</field>
+	<field name="funcionario_telefone" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="telefone"/>
+		<property name="com.jaspersoft.studio.field.label" value="funcionario_telefone"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="funcionario"/>
+	</field>
+	<field name="funcionario_tipo_contrato" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="tipo_contrato"/>
+		<property name="com.jaspersoft.studio.field.label" value="funcionario_tipo_contrato"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="funcionario"/>
+	</field>
+	<field name="curso_id" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="id"/>
+		<property name="com.jaspersoft.studio.field.label" value="curso_id"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="curso"/>
+	</field>
+	<field name="curso_carga_horaria" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="carga_horaria"/>
+		<property name="com.jaspersoft.studio.field.label" value="curso_carga_horaria"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="curso"/>
+	</field>
+	<field name="curso_descricao" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="descricao"/>
+		<property name="com.jaspersoft.studio.field.label" value="curso_descricao"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="curso"/>
+	</field>
+	<field name="curso_nome" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="nome"/>
+		<property name="com.jaspersoft.studio.field.label" value="curso_nome"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="curso"/>
+	</field>
+	<field name="curso_origem_curso" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="origem_curso"/>
+		<property name="com.jaspersoft.studio.field.label" value="curso_origem_curso"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="curso"/>
+	</field>
+	<field name="curso_tipo_obrigatoriedade" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="tipo_obrigatoriedade"/>
+		<property name="com.jaspersoft.studio.field.label" value="curso_tipo_obrigatoriedade"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="curso"/>
+	</field>
+	<field name="curso_validade_meses" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="validade_meses"/>
+		<property name="com.jaspersoft.studio.field.label" value="curso_validade_meses"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="curso"/>
+	</field>
+	<background splitType="Stretch"/>
+	<title height="154" splitType="Stretch">
+		<element kind="staticText" uuid="ff1527cb-2536-4d9a-975e-6cdc966d6213" x="118" y="12" width="437" height="48" fontName="DejaVu Sans" fontSize="25.0" bold="true" hTextAlign="Right" vTextAlign="Middle">
+			<text><![CDATA[REGISTRO DE TREINAMENTOS]]></text>
+		</element>
+		<element kind="textField" uuid="9c8f0709-c11d-4861-a180-60b76e27a6f2" x="118" y="80" width="437" height="30" fontName="DejaVu Sans" fontSize="18.0" bold="false" hTextAlign="Right" vTextAlign="Middle">
+			<expression><![CDATA[$F{funcionario_nome}]]></expression>
+		</element>
+		<element kind="textField" uuid="3d237172-e07e-4b68-b3f5-62047a50c609" x="118" y="130" width="437" height="20" fontName="DejaVu Sans" fontSize="10.0" hTextAlign="Right" vTextAlign="Middle">
+			<expression><![CDATA["Cargo: " + $F{funcionario_cargo}]]></expression>
+		</element>
+		<element kind="image" uuid="2a624e2b-c8fe-48fa-9cb8-0861015a3563" x="0" y="12" width="117" height="105">
+			<expression><![CDATA["https://github.com/BrunoVerly/projeto_rest_spring_boot/blob/master/src/main/resources/images/pdf_logo.png?raw=true"]]></expression>
+		</element>
+		<element kind="textField" uuid="07be5720-e982-4a54-964f-877b42ea1119" x="118" y="110" width="437" height="20" fontName="DejaVu Sans" fontSize="10.0" hTextAlign="Right" vTextAlign="Middle">
+			<expression><![CDATA["Admissão : " + new java.text.SimpleDateFormat("dd-MM-yyyy").format($F{funcionario_data_admissao})]]></expression>
+		</element>
+	</title>
+	<pageHeader height="41" splitType="Stretch">
+		<element kind="staticText" uuid="c86ed031-1366-411f-b61c-f51c7828b3f6" x="0" y="20" width="550" height="21" fontName="DejaVu Sans" fontSize="11.0" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[Treinamentos registrados do funcionário]]></text>
+		</element>
+	</pageHeader>
+	<columnHeader height="20" splitType="Stretch">
+		<element kind="staticText" uuid="d85b4c82-70d2-43b5-b263-90e97a1562ed" mode="Opaque" x="0" y="0" width="130" height="20" forecolor="#FFFFFF" backcolor="#235560" fontName="DejaVu Sans" fontSize="9.0" bold="true" hTextAlign="Left" vTextAlign="Middle">
+			<text><![CDATA[  Curso]]></text>
+		</element>
+		<element kind="staticText" uuid="0b9d0272-b06e-43e9-8e0b-e9e16c70f5ce" mode="Opaque" x="210" y="0" width="40" height="20" forecolor="#FFFFFF" backcolor="#235560" fontName="DejaVu Sans" fontSize="9.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[Carga]]></text>
+		</element>
+		<element kind="staticText" uuid="a6811a5f-a1ee-45b1-bd03-ec5cb2e9fa8d" mode="Opaque" x="350" y="0" width="70" height="20" forecolor="#FFFFFF" backcolor="#235560" fontName="DejaVu Sans" fontSize="9.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[Conclusão]]></text>
+		</element>
+		<element kind="staticText" uuid="34a9b493-ad84-413a-9cc5-8d7e80aba6b3" mode="Opaque" x="420" y="0" width="70" height="20" forecolor="#FFFFFF" backcolor="#235560" fontName="DejaVu Sans" fontSize="9.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[Vencimento]]></text>
+		</element>
+		<element kind="staticText" uuid="3f3eb734-ca46-4eee-b8a8-c1e0e8583efe" mode="Opaque" x="490" y="0" width="65" height="20" forecolor="#FFFFFF" backcolor="#235560" fontName="DejaVu Sans" fontSize="9.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[Status]]></text>
+		</element>
+		<element kind="staticText" uuid="9e84cc4d-cbc1-4e41-b41f-3889624e7d70" mode="Opaque" x="250" y="0" width="100" height="20" forecolor="#FFFFFF" backcolor="#235560" fontName="DejaVu Sans" fontSize="9.0" bold="true" hTextAlign="Left" vTextAlign="Middle">
+			<text><![CDATA[  Instrutor]]></text>
+		</element>
+		<element kind="staticText" uuid="ecb66df6-95ff-4918-ac1a-d21abaa53b1c" mode="Opaque" x="130" y="0" width="80" height="20" forecolor="#FFFFFF" backcolor="#235560" fontName="DejaVu Sans" fontSize="9.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[Tipo]]></text>
+		</element>
+	</columnHeader>
+	<detail>
+		<band height="20" splitType="Stretch">
+			<element kind="textField" uuid="6c7d65e1-a549-4d95-8cff-5b66a1e0d22d" x="0" y="0" width="130" height="20" fontName="DejaVu Sans" fontSize="8.0" hTextAlign="Left" vTextAlign="Middle" style="Style1">
+				<expression><![CDATA["  " + $F{curso_nome}]]></expression>
+			</element>
+			<element kind="textField" uuid="a874d254-2e78-4c63-a414-b334ea1bbb1b" x="250" y="0" width="100" height="20" fontName="DejaVu Sans" fontSize="8.0" hTextAlign="Left" vTextAlign="Middle" style="Style1">
+				<expression><![CDATA["  " + $F{treinamento_instrutor}]]></expression>
+			</element>
+			<element kind="textField" uuid="0a5bb3c8-27d2-4809-996c-a19de42f188a" x="350" y="0" width="70" height="20" fontName="DejaVu Sans" fontSize="8.0" pattern="dd/MM/yyyy" hTextAlign="Center" vTextAlign="Middle" style="Style1">
+				<expression><![CDATA[$F{treinamento_data_concluido}]]></expression>
+			</element>
+			<element kind="textField" uuid="c8dea146-730b-4f29-8e18-70507ff5f89e" x="420" y="0" width="70" height="20" fontName="DejaVu Sans" fontSize="8.0" pattern="dd/MM/yyyy" hTextAlign="Center" vTextAlign="Middle" style="Style1">
+				<expression><![CDATA[$F{treinamento_data_vencimento}]]></expression>
+			</element>
+			<element kind="textField" uuid="2c551bbf-ec4a-4a57-9f95-12e2c34b6c5c" x="490" y="0" width="65" height="20" fontName="DejaVu Sans" fontSize="8.0" hTextAlign="Center" vTextAlign="Middle" style="Style1">
+				<expression><![CDATA[$F{treinamento_status}]]></expression>
+			</element>
+			<element kind="textField" uuid="6300b93b-0701-4172-a190-f52b51a7b8ae" x="210" y="0" width="40" height="20" fontName="DejaVu Sans" fontSize="8.0" hTextAlign="Center" vTextAlign="Middle" style="Style1">
+				<expression><![CDATA[$F{curso_carga_horaria}]]></expression>
+			</element>
+			<element kind="textField" uuid="f35749ea-8c86-42e7-b08b-69b9e9ad99e5" x="130" y="0" width="80" height="20" fontName="DejaVu Sans" fontSize="8.0" hTextAlign="Center" vTextAlign="Middle" style="Style1">
+				<expression><![CDATA[$F{curso_tipo_obrigatoriedade}]]></expression>
+			</element>
+		</band>
+	</detail>
+	<columnFooter height="45" splitType="Stretch"/>
+	<pageFooter height="59" splitType="Stretch">
+		<element kind="textField" uuid="e670268b-44da-4070-a0c2-310a26e95e5d" x="390" y="20" width="100" height="30" fontName="DejaVu Sans" fontSize="8.0" hTextAlign="Right">
+			<expression><![CDATA["Página " + $V{PAGE_NUMBER}]]></expression>
+		</element>
+		<element kind="textField" uuid="bd6843a0-e18c-431c-b9ea-60e418709817" x="490" y="20" width="60" height="30" fontName="DejaVu Sans" fontSize="8.0" evaluationTime="Report" hTextAlign="Left">
+			<expression><![CDATA[" of " + $V{PAGE_NUMBER}]]></expression>
+		</element>
+		<element kind="textField" uuid="810a574d-6075-480d-ab1e-c5f3653151b7" x="20" y="25" width="140" height="20" fontName="DejaVu Sans" fontSize="8.0" pattern="MMMMM dd, yyyy">
+			<expression><![CDATA[new java.text.SimpleDateFormat("d 'de' MMMM 'de' yyyy", new java.util.Locale("pt", "BR")).format(new java.util.Date())]]></expression>
+		</element>
+	</pageFooter>
+	<summary height="42" splitType="Stretch"/>
+</jasperReport>
