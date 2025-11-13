@@ -82,7 +82,7 @@ public class CredencialController implements CredencialControllerDocs {
 
 
     @PostMapping(value = "/buscarPorVencimento",
-            consumes = MediaType.APPLICATION_JSON_VALUE,
+            consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_YAML_VALUE},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_YAML_VALUE})
     @Override
     public ResponseEntity<PagedModel<EntityModel<CredencialDTO>>> findCredencialExpiring(
@@ -98,7 +98,7 @@ public class CredencialController implements CredencialControllerDocs {
     }
 
     @PostMapping(value = "/buscarPorEmissao",
-            consumes = MediaType.APPLICATION_JSON_VALUE,
+            consumes  = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_YAML_VALUE},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_YAML_VALUE})
     @Override
     public ResponseEntity<PagedModel<EntityModel<CredencialDTO>>> findCredencialEmited(
@@ -134,11 +134,7 @@ public class CredencialController implements CredencialControllerDocs {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping(value = "/exportar", produces = {
-            MediaTypes.APPLICATION_XLSX_VALUE,
-            MediaTypes.APPLICATION_TEXT_CSV_VALUE,
-            MediaTypes.APPLICATION_PDF_VALUE})
-
+    @GetMapping(value = "/exportar")
     public ResponseEntity<Resource> exportPage(
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,

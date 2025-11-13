@@ -20,7 +20,15 @@ public class AuthController implements AuthControllerDocs {
     @Autowired
     AuthService service;
 
-    @PostMapping("/autenticar")
+    @PostMapping(value = "/autenticar",
+            consumes = {
+                    MediaType.APPLICATION_JSON_VALUE,
+                    MediaType.APPLICATION_XML_VALUE,
+                    MediaType.APPLICATION_YAML_VALUE},
+            produces = {
+                    MediaType.APPLICATION_JSON_VALUE,
+                    MediaType.APPLICATION_XML_VALUE,
+                    MediaType.APPLICATION_YAML_VALUE})
     @Override
     public ResponseEntity<?> signIn(@RequestBody AccountCredentialsDTO credentials) {
         if(credentials == null || StringUtils.isBlank(credentials.getUsername()) || StringUtils.isBlank(credentials.getPassword())) {
@@ -34,7 +42,15 @@ public class AuthController implements AuthControllerDocs {
         return ResponseEntity.ok().body(token);
     }
 
-    @PutMapping("/atualizar/{username}")
+    @PutMapping(value ="/atualizar/{username}",
+    consumes = {
+            MediaType.APPLICATION_JSON_VALUE,
+            MediaType.APPLICATION_XML_VALUE,
+            MediaType.APPLICATION_YAML_VALUE},
+    produces = {
+            MediaType.APPLICATION_JSON_VALUE,
+            MediaType.APPLICATION_XML_VALUE,
+            MediaType.APPLICATION_YAML_VALUE})
     @Override
     public ResponseEntity<?> refreshToken(
             @PathVariable("username") String username,
@@ -57,7 +73,8 @@ public class AuthController implements AuthControllerDocs {
     @PostMapping(value = "/criarUsuario",
             consumes = {
                     MediaType.APPLICATION_JSON_VALUE,
-                    MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_YAML_VALUE},
+                    MediaType.APPLICATION_XML_VALUE,
+                    MediaType.APPLICATION_YAML_VALUE},
             produces = {
                     MediaType.APPLICATION_JSON_VALUE,
                     MediaType.APPLICATION_XML_VALUE,

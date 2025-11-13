@@ -3,6 +3,7 @@ package com.example.projetoRestSpringBoot.service;
 import com.example.projetoRestSpringBoot.controller.CursoController;
 import com.example.projetoRestSpringBoot.dto.CursoDTO;
 import com.example.projetoRestSpringBoot.exception.BadRequestException;
+import com.example.projetoRestSpringBoot.exception.FileStorageException;
 import com.example.projetoRestSpringBoot.exception.RequiredObjectIsNullException;
 import com.example.projetoRestSpringBoot.exception.ResourceNotFoundException;
 import com.example.projetoRestSpringBoot.file.exporter.contract.FileExporter;
@@ -33,148 +34,314 @@ import java.util.concurrent.atomic.AtomicLong;
 import static com.example.projetoRestSpringBoot.mapper.ObjectMapper.parseObject;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
-
 @Service
 public class CursoService {
 
     private final AtomicLong counter = new AtomicLong();
-    private Logger logger = LoggerFactory.getLogger(CursoService.class.getName());
+    private final Logger logger = LoggerFactory.getLogger(CursoService.class.getName());
+
     @Autowired
-    CursoRepository repository;
+    private CursoRepository repository;
+
     @Autowired
-    FileImporterFactory importer;
+    private FileImporterFactory importer;
+
     @Autowired
-    FileExporterFactory exporter;
+    private FileExporterFactory exporter;
 
     @Autowired(required = false)
-    PagedResourcesAssembler<CursoDTO> assembler;
+    private PagedResourcesAssembler<CursoDTO> assembler;
 
     public PagedModel<EntityModel<CursoDTO>> findAll(Pageable pageable) {
-        logger.info(String.format("Procurando todos os cursos"));
+        if (pageable == null) {
+            throw new BadRequestException("Parâmetros de paginação não podem ser nulos");
+        }
+        if (pageable.getPageNumber() < 0 || pageable.getPageSize() <= 0) {
+            throw new BadRequestException("Parâmetros de paginação inválidos: page >= 0 e size > 0");
+        }
+        if (assembler == null) {
+            throw new RuntimeException("PagedResourcesAssembler não foi inicializado");
+        }
 
-        var people = repository.findAll(pageable);
-        Page<CursoDTO> peopleWithLinks = people.map(dto -> {
-            CursoDTO curso = parseObject(dto, CursoDTO.class);
-            HateoasLinkManager.addCursoDetailLinks(curso);
-            return curso;
-        });
-        Link findAllLink = WebMvcLinkBuilder.linkTo(
-                methodOn(CursoController.class).findAll(
-                        pageable.getPageNumber(),
-                        pageable.getPageSize(),
-                        String.valueOf(pageable.getSort())
-                )
-        ).withSelfRel();
-        return assembler.toModel(peopleWithLinks, findAllLink);
+        try {
+            logger.info("Procurando todos os cursos");
+            var people = repository.findAll(pageable);
+            Page<CursoDTO> peopleWithLinks = people.map(dto -> {
+                CursoDTO curso = parseObject(dto, CursoDTO.class);
+                HateoasLinkManager.addCursoDetailLinks(curso);
+                return curso;
+            });
+            Link findAllLink = WebMvcLinkBuilder.linkTo(
+                    methodOn(CursoController.class).findAll(
+                            pageable.getPageNumber(),
+                            pageable.getPageSize(),
+                            String.valueOf(pageable.getSort())
+                    )
+            ).withSelfRel();
+            var pagedModel = assembler.toModel(peopleWithLinks, findAllLink);
+            logger.info("Total de cursos encontrados: {}", people.getTotalElements());
+            return pagedModel;
+        } catch (BadRequestException e) {
+            logger.warn("Erro de validação ao buscar todos os cursos: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            logger.error("Erro inesperado ao buscar todos os cursos: {}", e.getMessage(), e);
+            throw new RuntimeException("Erro ao buscar cursos: " + e.getMessage());
+        }
     }
 
     public CursoDTO findById(long id) {
-        logger.info(String.format("Procurando um curso pelo Id"));
+        if (id <= 0) {
+            throw new BadRequestException("ID deve ser maior que zero");
+        }
 
-        var entity = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Id nao encontrado"));
-
-        var dto = parseObject(entity, CursoDTO.class);
-        HateoasLinkManager.addCursoDetailLinks(dto);
-        return dto;
+        try {
+            logger.info("Procurando um curso pelo Id: {}", id);
+            var entity = repository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Curso não encontrado para o ID: " + id));
+            var dto = parseObject(entity, CursoDTO.class);
+            HateoasLinkManager.addCursoDetailLinks(dto);
+            logger.info("Curso encontrado: ID {}", id);
+            return dto;
+        } catch (ResourceNotFoundException e) {
+            logger.warn("Curso não encontrado: {}", e.getMessage());
+            throw e;
+        } catch (BadRequestException e) {
+            logger.warn("Erro de validação ao buscar curso por ID: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            logger.error("Erro inesperado ao buscar curso por ID: {}", e.getMessage(), e);
+            throw new RuntimeException("Erro ao buscar curso: " + e.getMessage());
+        }
     }
 
     public Curso create(Curso curso) {
-        logger.info(String.format("Criando um novo curso no banco"));
+        if (curso == null) {
+            throw new RequiredObjectIsNullException();
+        }
+        if (curso.getNome() == null || curso.getNome().trim().isEmpty()) {
+            throw new BadRequestException("Nome do curso é obrigatório");
+        }
 
-        if (curso == null) throw new RequiredObjectIsNullException();
-        var entity = parseObject(curso, Curso.class);
-        var dto = parseObject(repository.save(entity), CursoDTO.class);
-        HateoasLinkManager.addCursoDetailLinks(dto);
-        return repository.save(entity);
+        try {
+            logger.info("Criando um novo curso no banco");
+            var entity = parseObject(curso, Curso.class);
+            var savedEntity = repository.save(entity);
+            var dto = parseObject(savedEntity, CursoDTO.class);
+            HateoasLinkManager.addCursoDetailLinks(dto);
+            logger.info("Curso criado com sucesso: ID {}", savedEntity.getId());
+            return savedEntity;
+        } catch (BadRequestException | RequiredObjectIsNullException e) {
+            logger.warn("Erro de validação ao criar curso: {}", e.getMessage());
+            throw e;
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            logger.error("Erro de integridade ao criar curso: {}", e.getMessage(), e);
+            throw new BadRequestException("Curso com nome duplicado ou dados inválidos");
+        } catch (Exception e) {
+            logger.error("Erro inesperado ao criar curso: {}", e.getMessage(), e);
+            throw new RuntimeException("Erro ao criar curso: " + e.getMessage());
+        }
     }
 
     public PagedModel<EntityModel<CursoDTO>> findByName(String nome, Pageable pageable) {
-        logger.info(String.format("Procurando curso(s) pelo nome"));
+        if (nome == null || nome.trim().isEmpty()) {
+            throw new BadRequestException("Nome não pode estar vazio");
+        }
+        if (pageable == null) {
+            throw new BadRequestException("Parâmetros de paginação não podem ser nulos");
+        }
+        if (pageable.getPageNumber() < 0 || pageable.getPageSize() <= 0) {
+            throw new BadRequestException("Parâmetros de paginação inválidos: page >= 0 e size > 0");
+        }
+        if (assembler == null) {
+            throw new RuntimeException("PagedResourcesAssembler não foi inicializado");
+        }
 
-        var cursos = repository.findCursoByName(nome, pageable);
-        var cursosLink = cursos.map(dto -> {
-            var curso = parseObject(dto, CursoDTO.class);
-            HateoasLinkManager.addCursoDetailLinks(curso);
-            return curso;
-        });
-        Link findAllLink = WebMvcLinkBuilder.linkTo(
-                methodOn(CursoController.class).findAll(
-                        pageable.getPageNumber(),
-                        pageable.getPageSize(),
-                        String.valueOf(pageable.getSort())
-                )
-        ).withSelfRel();
-        return assembler.toModel(cursosLink, findAllLink);
+        try {
+            logger.info("Procurando curso(s) pelo nome: {}", nome);
+            var cursos = repository.findCursoByName(nome, pageable);
+            var cursosLink = cursos.map(dto -> {
+                var curso = parseObject(dto, CursoDTO.class);
+                HateoasLinkManager.addCursoDetailLinks(curso);
+                return curso;
+            });
+            Link findAllLink = WebMvcLinkBuilder.linkTo(
+                    methodOn(CursoController.class).findAll(
+                            pageable.getPageNumber(),
+                            pageable.getPageSize(),
+                            String.valueOf(pageable.getSort())
+                    )
+            ).withSelfRel();
+            var pagedModel = assembler.toModel(cursosLink, findAllLink);
+            logger.info("Total de cursos encontrados para nome '{}': {}", nome, cursos.getTotalElements());
+            return pagedModel;
+        } catch (BadRequestException e) {
+            logger.warn("Erro de validação ao buscar curso por nome: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            logger.error("Erro inesperado ao buscar curso por nome: {}", e.getMessage(), e);
+            throw new RuntimeException("Erro ao buscar curso por nome: " + e.getMessage());
+        }
     }
 
     public CursoDTO update(CursoDTO curso) {
-        logger.info(String.format("Atualizando um curso no banco"));
+        if (curso == null) {
+            throw new RequiredObjectIsNullException();
+        }
+        if (curso.getId() == null || curso.getId() <= 0) {
+            throw new BadRequestException("ID do curso inválido ou ausente");
+        }
+        if (curso.getNome() == null || curso.getNome().trim().isEmpty()) {
+            throw new BadRequestException("Nome do curso é obrigatório");
+        }
 
-        if (curso == null) throw new RequiredObjectIsNullException();
+        try {
+            logger.info("Atualizando um curso no banco: ID {}", curso.getId());
+            Curso entity = repository.findById(curso.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Curso não encontrado para o ID: " + curso.getId()));
 
-        Curso entity = repository.findById(curso.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Id nao encontrado no banco"));
+            entity.setNome(curso.getNome());
+            entity.setDescricao(curso.getDescricao());
+            entity.setCargaHoraria(curso.getCargaHoraria());
+            entity.setValidadeMeses(curso.getValidadeMeses());
+            entity.setOrigemCurso(curso.getOrigemCurso());
+            entity.setTipoObrigatoriedade(curso.getTipoObrigatoriedade());
 
-        entity.setNome(curso.getNome());
-        entity.setDescricao(curso.getDescricao());
-        entity.setCargaHoraria(curso.getCargaHoraria());
-        entity.setValidadeMeses(curso.getValidadeMeses());
-        entity.setOrigemCurso(curso.getOrigemCurso());
-        entity.setTipoObrigatoriedade(curso.getTipoObrigatoriedade());
-
-        var dto = parseObject(repository.save(entity), CursoDTO.class);
-        HateoasLinkManager.addCursoDetailLinks(dto);
-        return dto;
-
+            var savedEntity = repository.save(entity);
+            var dto = parseObject(savedEntity, CursoDTO.class);
+            HateoasLinkManager.addCursoDetailLinks(dto);
+            logger.info("Curso atualizado com sucesso: ID {}", curso.getId());
+            return dto;
+        } catch (BadRequestException | ResourceNotFoundException | RequiredObjectIsNullException e) {
+            logger.warn("Erro de validação ao atualizar curso: {}", e.getMessage());
+            throw e;
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            logger.error("Erro de integridade ao atualizar curso: {}", e.getMessage(), e);
+            throw new BadRequestException("Erro ao atualizar: nome duplicado ou dados inválidos");
+        } catch (Exception e) {
+            logger.error("Erro inesperado ao atualizar curso: {}", e.getMessage(), e);
+            throw new RuntimeException("Erro ao atualizar curso: " + e.getMessage());
+        }
     }
 
     public void delete(long id) {
-        logger.info(String.format("Apagando um curso do banco"));
+        if (id <= 0) {
+            throw new BadRequestException("ID deve ser maior que zero");
+        }
 
-        Curso entity = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Id nao encontrado no banco"));
-        repository.delete(entity);
+        try {
+            logger.info("Apagando um curso do banco: ID {}", id);
+            Curso entity = repository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Curso não encontrado para o ID: " + id));
+            repository.delete(entity);
+            logger.info("Curso deletado com sucesso: ID {}", id);
+        } catch (ResourceNotFoundException e) {
+            logger.warn("Curso não encontrado para deletar: {}", e.getMessage());
+            throw e;
+        } catch (BadRequestException e) {
+            logger.warn("Erro de validação ao deletar curso: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            logger.error("Erro inesperado ao deletar curso: {}", e.getMessage(), e);
+            throw new RuntimeException("Erro ao deletar curso: " + e.getMessage());
+        }
     }
 
     public Resource exportPage(Pageable pageable, String acceptHeader) {
-        logger.info("Exportando a tabela de cursos no formato {}", acceptHeader);
-
-        var cursos = repository.findAll(pageable)
-                .map(curso -> parseObject(curso, CursoDTO.class))
-                .getContent();
+        if (pageable == null) {
+            throw new BadRequestException("Parâmetros de paginação não podem ser nulos");
+        }
+        if (pageable.getPageNumber() < 0 || pageable.getPageSize() <= 0) {
+            throw new BadRequestException("Parâmetros de paginação inválidos: page >= 0 e size > 0");
+        }
+        if (acceptHeader == null || acceptHeader.trim().isEmpty()) {
+            throw new BadRequestException("Header Accept é obrigatório");
+        }
 
         try {
+            logger.info("Exportando a tabela de cursos no formato: {}", acceptHeader);
+            var cursos = repository.findAll(pageable)
+                    .map(curso -> parseObject(curso, CursoDTO.class))
+                    .getContent();
+
+            if (cursos.isEmpty()) {
+                throw new ResourceNotFoundException("Nenhum curso encontrado para exportação");
+            }
+
             FileExporter exporter = this.exporter.getExporter(acceptHeader);
-            return exporter.exportCursos(cursos);
+            var resource = exporter.exportCursos(cursos);
+            logger.info("Cursos exportados com sucesso");
+            return resource;
+        } catch (BadRequestException | ResourceNotFoundException e) {
+            logger.warn("Erro ao exportar cursos: {}", e.getMessage());
+            throw e;
+        } catch (IllegalArgumentException e) {
+            logger.error("Formato de exportação inválido: {}", e.getMessage(), e);
+            throw new BadRequestException("Formato de arquivo não suportado: " + acceptHeader);
         } catch (Exception e) {
-            logger.error("Erro ao exportar arquivo: {}", e.getMessage(), e);
-            throw new RuntimeException("Erro ao exportar o arquivo");
+            logger.error("Erro inesperado ao exportar arquivo: {}", e.getMessage(), e);
+            throw new FileStorageException("Erro ao exportar o arquivo: " + e.getMessage(), e);
         }
     }
 
     public List<CursoDTO> importarArquivo(MultipartFile file) {
-        logger.info(String.format("Importando cursos em massa a partir de um arquivo"));
-        if (file.isEmpty()) throw new BadRequestException("Arquivo vazio");
+        if (file == null) {
+            throw new BadRequestException("Arquivo não pode ser nulo");
+        }
+        if (file.isEmpty()) {
+            throw new BadRequestException("Arquivo vazio");
+        }
 
-        try (InputStream inputStream = file.getInputStream()) {
-            String fileName = Optional.ofNullable(file.getOriginalFilename()).orElseThrow(() -> new BadRequestException("Nome do arquivo ausente"));
-            FileImporter importer = this.importer.getImporter(fileName);
+        String fileName = Optional.ofNullable(file.getOriginalFilename())
+                .orElseThrow(() -> new BadRequestException("Nome do arquivo ausente"));
 
-            List<Curso> entities = importer.importarCursos(inputStream).stream()
-                    .map(dto -> repository.save(parseObject(dto, Curso.class)))
-                    .toList();
+        if (fileName.trim().isEmpty()) {
+            throw new BadRequestException("Nome do arquivo inválido");
+        }
 
-            return entities.stream()
-                    .map(entity -> {
-                        var dto = parseObject(entity, CursoDTO.class);
-                        HateoasLinkManager.addCursoDetailLinks(dto);
-                        return dto;
-                    })
-                    .toList();
+        try {
+            logger.info("Importando cursos em massa a partir do arquivo: {}", fileName);
+
+            try (InputStream inputStream = file.getInputStream()) {
+                FileImporter importer = this.importer.getImporter(fileName);
+
+                List<Curso> entities = importer.importarCursos(inputStream).stream()
+                        .map(dto -> {
+                            try {
+                                return repository.save(parseObject(dto, Curso.class));
+                            } catch (org.springframework.dao.DataIntegrityViolationException e) {
+                                logger.error("Erro de integridade ao salvar curso do arquivo: {}", e.getMessage());
+                                throw new BadRequestException("Dados duplicados ou inválidos no arquivo");
+                            }
+                        })
+                        .toList();
+
+                var result = entities.stream()
+                        .map(entity -> {
+                            var dto = parseObject(entity, CursoDTO.class);
+                            HateoasLinkManager.addCursoDetailLinks(dto);
+                            return dto;
+                        })
+                        .toList();
+
+                logger.info("Arquivo importado com sucesso: {} cursos", result.size());
+                return result;
+            }
+        } catch (BadRequestException e) {
+            logger.warn("Erro de validação ao importar arquivo: {}", e.getMessage());
+            throw e;
+        } catch (java.io.IOException e) {
+            logger.error("Erro ao ler arquivo: {}", e.getMessage(), e);
+            throw new FileStorageException("Erro ao ler o arquivo: " + e.getMessage(), e);
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            logger.error("Erro de integridade ao importar cursos: {}", e.getMessage(), e);
+            throw new BadRequestException("Erro ao importar: dados duplicados ou inválidos no arquivo");
+        } catch (IllegalArgumentException e) {
+            logger.error("Tipo de arquivo não suportado: {}", e.getMessage(), e);
+            throw new BadRequestException("Tipo de arquivo não suportado: " + fileName);
         } catch (Exception e) {
-            throw new BadRequestException("Erro ao ler o arquivo: " + e.getMessage());
+            logger.error("Erro inesperado ao importar arquivo: {}", e.getMessage(), e);
+            throw new FileStorageException("Erro ao processar o arquivo: " + e.getMessage(), e);
         }
     }
-
 }

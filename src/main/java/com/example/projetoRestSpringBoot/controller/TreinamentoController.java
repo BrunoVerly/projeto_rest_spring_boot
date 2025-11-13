@@ -65,9 +65,9 @@ public class TreinamentoController implements TreinamentoControllerDocs {
         return ResponseEntity.ok(service.findByStatus(status, pageable));
     }
 
-    @GetMapping(value="/buscarPorInstrutor",produces = {MediaType.APPLICATION_JSON_VALUE,
-            MediaType.APPLICATION_XML_VALUE,
-            MediaType.APPLICATION_YAML_VALUE})
+    @GetMapping(value="/buscarPorInstrutor",
+            consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_YAML_VALUE},
+            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_YAML_VALUE})
     public ResponseEntity<PagedModel<EntityModel<TreinamentoDTO>>> findByInstrutor(
             @RequestBody Map<String, String> body,
             @RequestParam(value = "page", defaultValue = "0") int page,
@@ -81,7 +81,7 @@ public class TreinamentoController implements TreinamentoControllerDocs {
     }
 
     @PostMapping(value = "/buscarPorVencimento",
-            consumes = MediaType.APPLICATION_JSON_VALUE,
+            consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_YAML_VALUE},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_YAML_VALUE})
     public ResponseEntity<PagedModel<EntityModel<TreinamentoDTO>>> findTreinamentoExpiring(
             @RequestBody IntervaloDataDTO intervalo,
@@ -95,7 +95,7 @@ public class TreinamentoController implements TreinamentoControllerDocs {
     }
 
     @PostMapping(value = "/buscarPorConclusao",
-            consumes = MediaType.APPLICATION_JSON_VALUE,
+            consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_YAML_VALUE},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_YAML_VALUE})
     public ResponseEntity<PagedModel<EntityModel<TreinamentoDTO>>> findTreinamentoConluded(
             @RequestBody IntervaloDataDTO intervalo,

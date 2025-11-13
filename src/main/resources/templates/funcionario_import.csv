@@ -1,0 +1,21 @@
+nome,cpf,rg,matricula,cargo,dataNascimento,departamento,dataAdmissao,situacao,tipoContrato,email,telefone
+Rafael Andrade,101.101.101-01,SP-11.111.111,2001,Analista de Sistemas,1991-02-14,Tecnologia,2023-05-10,ATIVO,CLT,rafael.andrade@exemplo.com,(11) 98765-2001
+Patrícia Souza,102.102.102-02,MG-22.222.222,2002,Analista de Dados,1988-08-30,Dados,2022-09-01,ATIVO,CLT,patricia.souza@exemplo.com,(31) 98765-2002
+Eduardo Nunes,103.103.103-03,RJ-33.333.333,2003,Desenvolvedor Backend,1993-11-11,Tecnologia,2021-03-20,ATIVO,PJ,eduardo.nunes@exemplo.com,(21) 98765-2003
+Sônia Martins,104.104.104-04,SP-44.444.444,2004,Analista Financeiro,1986-04-25,Financeiro,2020-12-15,AFASTADO,CLT,sonia.martins@exemplo.com,(11) 98765-2004
+Gustavo Lima,105.105.105-05,ES-55.555.555,2005,Coordenador Comercial,1982-06-06,Comercial,2019-07-01,ATIVO,CLT,gustavo.lima@exemplo.com,(27) 98765-2005
+Mariana Rocha,106.106.106-06,RJ-66.666.666,2006,Analista de Marketing,1995-10-02,Marketing,2024-01-05,ATIVO,ESTAGIO,mariana.rocha@exemplo.com,(21) 98765-2006
+Felipe Castro,107.107.107-07,MG-77.777.777,2007,Técnico de Suporte,1990-12-19,Suporte,2023-11-20,ATIVO,TERCEIRIZADO,felipe.castro@exemplo.com,(31) 98765-2007
+Ana Paula Ribeiro,108.108.108-08,SP-88.888.888,2008,Recursos Humanos,1989-01-30,RH,2018-04-12,LICENCA,CLT,ana.ribeiro@exemplo.com,(11) 98765-2008
+Bruno Silva,109.109.109-09,RJ-99.999.999,2009,Arquiteto de Software,1981-09-09,Tecnologia,2017-02-02,ATIVO,CLT,bruno.silva@exemplo.com,(21) 98765-2009
+Carolina Dias,110.110.110-10,MG-12.123.123,2010,Analista de Qualidade,1994-03-17,Qualidade,2022-06-30,DESLIGADO,CLT,carolina.dias@exemplo.com,(31) 98765-2010
+Victor Oliveira,111.111.111-11,SP-23.234.234,2011,Gerente de TI,1979-05-05,Tecnologia,2016-08-08,ATIVO,CLT,victor.oliveira@exemplo.com,(11) 98765-2011
+Larissa Fernandes,112.112.112-12,RJ-34.345.345,2012,Analista de Segurança,1992-07-07,Segurança,2020-11-11,ATIVO,PJ,larissa.fernandes@exemplo.com,(21) 98765-2012
+Rogério Almeida,113.113.113-13,MG-45.456.456,2013,Coordenador de Infra,1985-01-01,Infraestrutura,2019-09-09,ATIVO,CLT,rogerio.almeida@exemplo.com,(31) 98765-2013
+Bianca Pinto,114.114.114-14,SP-56.567.567,2014,Analista Comercial,1996-02-02,Comercial,2024-03-03,ATIVO,CLT,bianca.pinto@exemplo.com,(11) 98765-2014
+Henrique Torres,115.115.115-15,RJ-67.678.678,2015,Engenheiro de Dados,1987-10-10,Dados,2021-10-10,ATIVO,TEMPORARIO,henrique.torres@exemplo.com,(21) 98765-2015
+Natália Gomes,116.116.116-16,MG-78.789.789,2016,Analista de Produto,1990-06-06,Produto,2022-02-14,ATIVO,CLT,natalia.gomes@exemplo.com,(31) 98765-2016
+Marcelo Barros,117.117.117-17,SP-89.890.890,2017,Suporte Nível 2,1984-08-18,Suporte,2018-05-20,ATIVO,CLT,mrc.barros@exemplo.com,(11) 98765-2017
+Juliana Moreira,118.118.118-18,RJ-90.901.901,2018,Analista de BI,1993-09-23,BI,2020-01-15,ATIVO,ESTAGIO,juliana.moreira@exemplo.com,(21) 98765-2018
+Thiago Freitas,119.119.119-19,MG-01.012.012,2019,Desenvolvedor Frontend,1992-12-12,Tecnologia,2023-04-25,ATIVO,PJ,thiago.freitas@exemplo.com,(31) 98765-2019
+Simone Carvalho,120.120.120-20,SP-02.023.023,2020,Analista de Compras,1988-11-11,Compras,2019-12-01,AFASTADO,TERCEIRIZADO,simone.carvalho@exemplo.com,(11) 98765-2020

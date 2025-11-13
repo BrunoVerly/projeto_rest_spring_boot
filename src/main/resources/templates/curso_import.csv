@@ -1,0 +1,21 @@
+nome,descricao,cargaHoraria,validadeMeses,origemCurso,tipoObrigatoriedade
+Fundamentos de Cloud,Introdução a conceitos de cloud computing,30,12,EXTERNO,ADICIONAL
+Análise de Dados com R,Curso prático de análise usando R,40,24,INTERNO,ADICIONAL
+Testes Automatizados,Boas práticas em testes automatizados,20,12,INTERNO,OBRIGATORIO
+Design Thinking,Metodologias de inovação e design,16,12,EXTERNO,ADICIONAL
+Kubernetes Básico,Implantação e orquestração de containers,24,36,EXTERNO,OBRIGATORIO
+Comunicação Não Violenta,Técnicas para comunicação eficaz,12,12,INTERNO,ADICIONAL
+Controle de Versão Avançado,Fluxos Git e integração contínua,18,24,EXTERNO,ADICIONAL
+Docker na Prática,Criação e gestão de containers,20,12,EXTERNO,ADICIONAL
+Noções de UX,Princípios de experiência do usuário,10,12,INTERNO,ADICIONAL
+Big Data Essentials,Introdução a processamento de grandes volumes,60,36,EXTERNO,OBRIGATORIO
+Cybersecurity Awareness,Segurança básica para colaboradores,8,12,INTERNO,OBRIGATORIO
+APIs RESTful,Construção e consumo de APIs,28,24,EXTERNO,ADICIONAL
+Automação de Processos,RPA e automações corporativas,30,18,INTERNO,ADICIONAL
+SQL Avançado,Consultas complexas e performance,36,24,EXTERNO,OBRIGATORIO
+Power Automate Básico,Automatização com Power Platform,14,12,INTERNO,ADICIONAL
+Ethical Hacking Intro,Noções de segurança ofensiva,40,36,EXTERNO,ADICIONAL
+Gestão de Mudanças,Processos de mudança organizacional,22,12,INTERNO,OBRIGATORIO
+Negociação Corporativa,Técnicas e estratégias de negociação,16,12,EXTERNO,ADICIONAL
+Sustentabilidade Corporativa,Boas práticas ambientais na empresa,12,12,INTERNO,ADICIONAL
+Oratória Profissional,Apresentação e comunicação em público,10,12,EXTERNO,OBRIGATORIO

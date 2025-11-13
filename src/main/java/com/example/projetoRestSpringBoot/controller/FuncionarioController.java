@@ -4,6 +4,7 @@ import com.example.projetoRestSpringBoot.controller.docs.FuncionariosControllerD
 import com.example.projetoRestSpringBoot.dto.FuncionarioDTO;
 import com.example.projetoRestSpringBoot.dto.IntervaloDataDTO;
 import com.example.projetoRestSpringBoot.enums.FuncionarioSituacao;
+import com.example.projetoRestSpringBoot.exception.BadRequestException;
 import com.example.projetoRestSpringBoot.file.exporter.MediaTypes;
 import com.example.projetoRestSpringBoot.model.Funcionario;
 import com.example.projetoRestSpringBoot.service.FuncionarioService;
@@ -81,13 +82,17 @@ public class FuncionarioController implements FuncionariosControllerDocs {
     }
 
     @PostMapping(value = "/buscarPorAdmissao",
-            consumes = MediaType.APPLICATION_JSON_VALUE,
+            consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_YAML_VALUE},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_YAML_VALUE})
     public ResponseEntity<PagedModel<EntityModel<FuncionarioDTO>>> findByAdmissao(
             @RequestBody IntervaloDataDTO intervalo,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
             @RequestParam(value = "direction", defaultValue = "asc") String direction) {
+
+        if (intervalo == null || intervalo.getStartDate() == null || intervalo.getEndDate() == null) {
+            throw new BadRequestException("Datas de início e fim são obrigatórias");
+        }
 
         var sortDirection = "desc".equalsIgnoreCase(direction) ? Direction.DESC : Direction.ASC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, "nome"));
@@ -162,6 +167,10 @@ public class FuncionarioController implements FuncionariosControllerDocs {
             @RequestParam(value = "direction", defaultValue = "asc") String direction,
             HttpServletRequest request
     ){
+        if (page < 0 || size <= 0) {
+            throw new BadRequestException("Parâmetros de paginação inválidos: page >= 0 e size > 0");
+        }
+
         var sortDirection = "desc".equalsIgnoreCase(direction) ? Direction.DESC : Direction.ASC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, "nome"));
 

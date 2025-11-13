@@ -1,29 +1,86 @@
 package com.example.projetoRestSpringBoot.controller.docs;
 
+import com.example.projetoRestSpringBoot.dto.CredencialDTO;
+import com.example.projetoRestSpringBoot.dto.FuncionarioDTO;
 import com.example.projetoRestSpringBoot.dto.security.AccountCredentialsDTO;
+import com.example.projetoRestSpringBoot.dto.security.TokenDTO;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Autorização", description = "Endpoints para autorização e cadastro de usuários")
 public interface AuthControllerDocs {
-    @Operation(summary = "Autentica o usuário e retorna um token JWT")
-    @PostMapping("/signin")
+    @Operation(summary = "Recuperar token de acesso",
+            description = "Endpoint para autenticar um usuário e recuperar o token de acesso.",
+            responses = {
+                    @ApiResponse(
+                            description = "Success",
+                            responseCode = "200",
+                            content = {
+                                    @Content(
+                                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                            array = @ArraySchema(schema = @Schema(implementation = TokenDTO.class))
+                                    )
+
+                            }),
+                    @ApiResponse(description = "No Content", responseCode = "204", content = @Content),
+                    @ApiResponse(description = "Bad Request", responseCode = "400", content = @Content),
+                    @ApiResponse(description = "Unauthorized", responseCode = "401", content = @Content),
+                    @ApiResponse(description = "Not Found", responseCode = "404", content = @Content),
+                    @ApiResponse(description = "Internal error", responseCode = "500", content = @Content),
+            })
     ResponseEntity<?> signIn(@RequestBody AccountCredentialsDTO credentials);
 
-    @Operation(summary = "Atualizar o token JWT usando um token de atualização")
-    @PutMapping("/refresh/{username}")
+    @Operation(summary = "Atualizar token de acesso",
+            description = "Endpoint para atualizar o token de acesso utilizando um token de atualização.",
+            responses = {
+                    @ApiResponse(
+                            description = "Success",
+                            responseCode = "200",
+                            content = {
+                                    @Content(
+                                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                            array = @ArraySchema(schema = @Schema(implementation = TokenDTO.class))
+                                    )
+
+                            }),
+                    @ApiResponse(description = "No Content", responseCode = "204", content = @Content),
+                    @ApiResponse(description = "Bad Request", responseCode = "400", content = @Content),
+                    @ApiResponse(description = "Unauthorized", responseCode = "401", content = @Content),
+                    @ApiResponse(description = "Not Found", responseCode = "404", content = @Content),
+                    @ApiResponse(description = "Internal error", responseCode = "500", content = @Content),
+            })
     ResponseEntity<?> refreshToken(
             @PathVariable("username") String username,
             @RequestHeader("Authorization") String refreshToken);
 
-    @PostMapping(value = "/criarUsuario",
-            consumes = {
-                    MediaType.APPLICATION_JSON_VALUE,
-                    MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_YAML_VALUE},
-            produces = {
-                    MediaType.APPLICATION_JSON_VALUE,
-                    MediaType.APPLICATION_XML_VALUE,
-                    MediaType.APPLICATION_YAML_VALUE})
-    AccountCredentialsDTO create(@RequestBody AccountCredentialsDTO credentials);
+
+
+    @Operation(summary = "Criar novo usuário",
+            description = "Endpoint para criar um novo usuário no sistema.",
+            responses = {
+                    @ApiResponse(
+                            description = "Success",
+                            responseCode = "200",
+                            content = {
+                                    @Content(
+                                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                            array = @ArraySchema(schema = @Schema(implementation = AccountCredentialsDTO.class))
+                                    )
+
+                            }),
+                    @ApiResponse(description = "No Content", responseCode = "204", content = @Content),
+                    @ApiResponse(description = "Bad Request", responseCode = "400", content = @Content),
+                    @ApiResponse(description = "Unauthorized", responseCode = "401", content = @Content),
+                    @ApiResponse(description = "Not Found", responseCode = "404", content = @Content),
+                    @ApiResponse(description = "Internal error", responseCode = "500", content = @Content),
+            })
+            AccountCredentialsDTO create(@RequestBody AccountCredentialsDTO credentials);
+
 }
