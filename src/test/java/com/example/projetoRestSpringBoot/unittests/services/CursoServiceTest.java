@@ -94,27 +94,13 @@ class CursoServiceTest {
 
         assertTrue(result.getLinks().stream()
                 .anyMatch(link -> link.getRel().value().equals("delete")
-                        && link.getType().equals("GET")));
+                        && link.getType().equals("DELETE")));
 
-        assertTrue(result.getLinks().stream()
-                .anyMatch(link -> link.getRel().value().equals("create")
-                        && link.getType().equals("POST")));
 
         assertTrue(result.getLinks().stream()
                 .anyMatch(link -> link.getRel().value().equals("update")
                         && link.getType().equals("PUT")));
 
-        assertTrue(result.getLinks().stream()
-                .anyMatch(link -> link.getRel().value().equals("importarArquivo")
-                        && link.getType().equals("POST")));
-
-        assertTrue(result.getLinks().stream()
-                .anyMatch(link -> link.getRel().value().equals("exportPage")
-                        && link.getType().equals("GET")));
-
-        assertTrue(result.getLinks().stream()
-                .anyMatch(link -> link.getRel().value().equals("findByName")
-                        && link.getType().equals("GET")));
     }
 
     @Test

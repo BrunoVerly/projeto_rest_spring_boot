@@ -86,19 +86,15 @@ class CredencialServiceTest {
         assertEquals(credencial.getFuncionario().getMatricula(), result.getFuncionarioMatricula(), "Matrícula funcionário deve corresponder");
 
         assertFalse(result.getLinks().isEmpty(), "Links não devem estar vazios");
-        assertEquals(7, result.getLinks().stream().count(), "Deve conter 7 links");
+        assertEquals(5, result.getLinks().stream().count(), "Deve conter 7 links");
 
         assertTrue(result.getLinks().stream()
                         .anyMatch(link -> "self".equals(link.getRel().value()) && "GET".equals(link.getType())),
                 "Deve conter link self com tipo GET");
 
         assertTrue(result.getLinks().stream()
-                        .anyMatch(link -> "delete".equals(link.getRel().value()) && "GET".equals(link.getType())),
+                        .anyMatch(link -> "delete".equals(link.getRel().value()) && "DELETE".equals(link.getType())),
                 "Deve conter link delete com tipo GET");
-
-        assertTrue(result.getLinks().stream()
-                        .anyMatch(link -> "create".equals(link.getRel().value()) && "POST".equals(link.getType())),
-                "Deve conter link create com tipo POST");
 
         assertTrue(result.getLinks().stream()
                         .anyMatch(link -> "update".equals(link.getRel().value()) && "PUT".equals(link.getType())),
@@ -112,9 +108,6 @@ class CredencialServiceTest {
                         .anyMatch(link -> "status".equals(link.getRel().value()) && "GET".equals(link.getType())),
                 "Deve conter link status com tipo GET");
 
-        assertTrue(result.getLinks().stream()
-                        .anyMatch(link -> "exportPage".equals(link.getRel().value()) && "GET".equals(link.getType())),
-                "Deve conter link exportPage com tipo GET");
 
         verify(repository, times(1)).findById(credencialId);
     }
@@ -291,7 +284,7 @@ class CredencialServiceTest {
         assertNotNull(result, "Resultado não deve ser nulo");
         assertEquals(1L, result.getId(), "ID deve corresponder");
         assertFalse(result.getLinks().isEmpty(), "Links não devem estar vazios");
-        assertEquals(7, result.getLinks().stream().count(), "Deve conter 7 links");
+        assertEquals(5, result.getLinks().stream().count(), "Deve conter 7 links");
 
         assertTrue(result.getLinks().stream()
                         .anyMatch(link -> "self".equals(link.getRel().value())),

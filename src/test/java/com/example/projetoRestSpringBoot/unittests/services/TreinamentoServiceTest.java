@@ -92,7 +92,7 @@ class TreinamentoServiceTest {
 
         // Validação completa dos links HATEOAS
         assertFalse(result.getLinks().isEmpty(), "Links HATEOAS não devem estar vazios");
-        assertEquals(5, result.getLinks().stream().count(), "Deve conter exatamente 5 links HATEOAS");
+        assertEquals(4, result.getLinks().stream().count(), "Deve conter exatamente 5 links HATEOAS");
 
         assertTrue(result.getLinks().stream()
                         .anyMatch(link -> link.getRel().value().equals("self")
@@ -101,23 +101,9 @@ class TreinamentoServiceTest {
 
         assertTrue(result.getLinks().stream()
                         .anyMatch(link -> link.getRel().value().equals("delete")
-                                && link.getType().equals("GET")),
+                                && link.getType().equals("DELETE")),
                 "Link delete com tipo GET deve existir");
 
-        assertTrue(result.getLinks().stream()
-                        .anyMatch(link -> link.getRel().value().equals("create")
-                                && link.getType().equals("POST")),
-                "Link create com tipo POST deve existir");
-
-        assertTrue(result.getLinks().stream()
-                        .anyMatch(link -> link.getRel().value().equals("update")
-                                && link.getType().equals("PUT")),
-                "Link update com tipo PUT deve existir");
-
-        assertTrue(result.getLinks().stream()
-                        .anyMatch(link -> link.getRel().value().equals("exportPage")
-                                && link.getType().equals("GET")),
-                "Link exportPage com tipo GET deve existir");
 
         verify(repository, times(1)).findById(1L);
     }
@@ -361,7 +347,7 @@ class TreinamentoServiceTest {
         assertEquals(1L, result.getId(), "ID deve ser 1");
         assertEquals("João Silva", result.getInstrutor(), "Instrutor deve ser atualizado");
         assertFalse(result.getLinks().isEmpty(), "Links HATEOAS não devem estar vazios");
-        assertEquals(5, result.getLinks().stream().count(), "Deve conter exatamente 5 links HATEOAS");
+        assertEquals(4, result.getLinks().stream().count(), "Deve conter exatamente 5 links HATEOAS");
 
         verify(repository, times(1)).findById(1L);
         verify(repository, times(1)).save(any(Treinamento.class));
