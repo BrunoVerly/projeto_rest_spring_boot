@@ -8,16 +8,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Login to Docker Hub
-      uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
 
-    - uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: '21'
-        cache: maven
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: maven
+
+      - name: Build Application .jar
+        working-directory: ./
+        run: mvn clean package
+
+      - name: Docker Compose Build
+        working-directory: ./
+        run: docker compose build
+
+      - name: Push to Docker Hub Container Registry
+        run: |
+          docker tag ${{ secrets.DOCKER_USERNAME }}/projeto_rest_spring_boot:latest brunoverly/projeto_rest_spring_boot:ghjid
+          docker push ${{ secrets.DOCKER_USERNAME }}/projeto_rest_spring_boot:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/projeto_rest_spring_boot:${{ github.run_id }}
