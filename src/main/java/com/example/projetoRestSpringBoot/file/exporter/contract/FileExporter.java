@@ -12,4 +12,6 @@ public interface FileExporter {
     Resource exportarCredenciais (List<CredencialDTO> credenciais) throws Exception;
     Resource exportTreinamentos (List<TreinamentoDTO> treinamentos) throws Exception;
     Resource exportCursos (List<CursoDTO> cursos) throws Exception;
+    Resource exportTreinamentoPorId(TreinamentoDTO treinamento, long funcionarioId) throws Exception;
+
 }

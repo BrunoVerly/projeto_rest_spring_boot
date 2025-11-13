@@ -143,5 +143,10 @@ public class CsvExporter implements FileExporter {
         }
         return new ByteArrayResource(outputStream.toByteArray());
     }
+
+    @Override
+    public Resource exportTreinamentoPorId(TreinamentoDTO treinamento, long funcionarioId) throws Exception {
+        return null;
+    }
 }
 

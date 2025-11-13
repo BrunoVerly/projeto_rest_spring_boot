@@ -169,4 +169,17 @@ public class TreinamentoController implements TreinamentoControllerDocs {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
                 .body(file);
     }
+
+        @GetMapping(value = "/exportar/{id}", produces = MediaTypes.APPLICATION_PDF_VALUE)
+        public ResponseEntity<Resource> exportarPorId(
+                @PathVariable("id") long id
+        ) {
+            Resource file = service.exportarPorId(id);
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(MediaTypes.APPLICATION_PDF_VALUE))
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"treinamento_" + id + ".pdf\"")
+                    .body(file);
+        }
+
 }

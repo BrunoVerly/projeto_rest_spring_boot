@@ -4,6 +4,7 @@ package com.example.projetoRestSpringBoot.controller;
 import com.example.projetoRestSpringBoot.controller.docs.AuthControllerDocs;
 import com.example.projetoRestSpringBoot.dto.security.AccountCredentialsDTO;
 import com.example.projetoRestSpringBoot.service.AuthService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,7 @@ public class AuthController implements AuthControllerDocs {
         return ResponseEntity.ok().body(token);
     }
 
+
     @PutMapping(value ="/atualizar/{username}",
     consumes = {
             MediaType.APPLICATION_JSON_VALUE,
@@ -69,6 +71,7 @@ public class AuthController implements AuthControllerDocs {
     private boolean parametersAreInvalid(String username, String refreshToken) {
         return StringUtils.isBlank(username) || StringUtils.isBlank(refreshToken);
     }
+
 
     @PostMapping(value = "/criarUsuario",
             consumes = {

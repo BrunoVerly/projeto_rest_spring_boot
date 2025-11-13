@@ -25,16 +25,16 @@ public class EmailController implements EmailControllerDocs {
 
         service.sentSimpleEmail(emailRequest);
 
-        return new ResponseEntity<>("Email sent", HttpStatus.OK);
+        return new ResponseEntity<>("E-mail enviado com sucesso", HttpStatus.OK);
     }
 
-    @PostMapping(value ="/withAttachment", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value ="/anexo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Override
     public ResponseEntity<String> sendEmailWithAttachment(
             @RequestParam("emailRequest") String emailRequest,
             @RequestParam("attachment") MultipartFile attachment) {
         service.senEmailWithAttachment(emailRequest,  attachment);
 
-        return new ResponseEntity<>("Email with attachment sent", HttpStatus.OK);
+        return new ResponseEntity<>("E-mail e anexo enviado com sucesso", HttpStatus.OK);
     }
 }

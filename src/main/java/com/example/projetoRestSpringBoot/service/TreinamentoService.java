@@ -7,6 +7,7 @@ import com.example.projetoRestSpringBoot.exception.BadRequestException;
 import com.example.projetoRestSpringBoot.exception.FileStorageException;
 import com.example.projetoRestSpringBoot.exception.RequiredObjectIsNullException;
 import com.example.projetoRestSpringBoot.exception.ResourceNotFoundException;
+import com.example.projetoRestSpringBoot.file.exporter.MediaTypes;
 import com.example.projetoRestSpringBoot.file.exporter.contract.FileExporter;
 import com.example.projetoRestSpringBoot.file.exporter.factory.FileExporterFactory;
 import com.example.projetoRestSpringBoot.model.Curso;
@@ -579,6 +580,42 @@ public class TreinamentoService {
         }
     }
 
+    public Resource exportarPorId(long id) {
+        if (id <= 0) {
+            throw new BadRequestException("ID deve ser maior que zero");
+        }
+
+        try {
+            logger.info("Exportando treinamento PDF por ID: {}", id);
+            Treinamento treinamento = repository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Treinamento não encontrado"));
+
+            TreinamentoDTO dto = parseObject(treinamento, TreinamentoDTO.class);
+
+            if (treinamento.getFuncionario() != null) {
+                dto.setFuncionarioId(treinamento.getFuncionario().getId());
+                dto.setFuncionarioNome(treinamento.getFuncionario().getNome());
+                dto.setFuncionarioMatricula(treinamento.getFuncionario().getMatricula());
+            }
+
+            if (treinamento.getCurso() != null) {
+                dto.setCursoId(treinamento.getCurso().getId());
+                dto.setCursoNome(treinamento.getCurso().getNome());
+            }
+
+            FileExporter exporterObj = this.exporter.getExporter(MediaTypes.APPLICATION_PDF_VALUE);
+            var resource = exporterObj.exportTreinamentoPorId(dto, treinamento.getFuncionario().getId());
+            logger.info("Treinamento exportado com sucesso: ID {}", id);
+            return resource;
+        } catch (ResourceNotFoundException e) {
+            logger.warn("Treinamento não encontrado para exportar: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            logger.error("Erro ao exportar treinamento: {}", e.getMessage(), e);
+            throw new FileStorageException("Erro ao exportar PDF: " + e.getMessage(), e);
+        }
+    }
+
     @Scheduled(cron = "0 0 0 * * ?")
     public void atualizarStatusTreinamentos() {
         try {
@@ -606,4 +643,5 @@ public class TreinamentoService {
             return TreinamentoStatus.VALIDO;
         }
     }
+
 }

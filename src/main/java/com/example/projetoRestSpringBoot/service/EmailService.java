@@ -2,6 +2,7 @@ package com.example.projetoRestSpringBoot.service;
 
 import com.example.projetoRestSpringBoot.config.EmailConfig;
 import com.example.projetoRestSpringBoot.dto.request.EmailRequestDTO;
+import com.example.projetoRestSpringBoot.exception.EmailSendingException;
 import com.example.projetoRestSpringBoot.mail.EmailSender;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,11 +21,17 @@ public class EmailService {
     private EmailConfig emailConfig;
 
     public void sentSimpleEmail(EmailRequestDTO emailRequest){
-        emailSender
-                .to(emailRequest.getTo())
-                .withSubject(emailRequest.getSubject())
-                .withMessage(emailRequest.getBody())
-                .send(emailConfig);
+        try {
+            emailSender
+                    .to(emailRequest.getTo())
+                    .withSubject(emailRequest.getSubject())
+                    .withMessage(emailRequest.getBody())
+                    .send(emailConfig);
+        } catch (EmailSendingException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new EmailSendingException("Erro ao enviar e-mail simples: " + e.getMessage(), e);
+        }
     }
 
     public void senEmailWithAttachment(String emailRequestJson, MultipartFile attachment){
@@ -42,9 +49,13 @@ public class EmailService {
                     .send(emailConfig);
 
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Error parsing email request JSON", e);
+            throw new EmailSendingException("Erro ao converter o e-mail para JSON: " + e.getMessage(), e);
         } catch (IOException e) {
-            throw new RuntimeException("Error processing the attachment", e);
+            throw new EmailSendingException("Erro ao processar o anexo: " + e.getMessage(), e);
+        } catch (EmailSendingException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new EmailSendingException("Erro ao enviar e-mail com anexo: " + e.getMessage(), e);
         }
         finally {
             if (tempFile != null && tempFile.exists()) {

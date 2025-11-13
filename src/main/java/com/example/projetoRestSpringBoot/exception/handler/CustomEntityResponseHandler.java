@@ -28,6 +28,19 @@ public class CustomEntityResponseHandler {
                 e.getMessage(), webRequest);
     }
 
+    @ExceptionHandler(BadRequestException.class)
+    public final ResponseEntity<ExceptionResponse> handleBadRequest(
+            BadRequestException e, WebRequest webRequest) {
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, "Bad Request",
+                e.getMessage(), webRequest);
+    }
+    @ExceptionHandler(EmailSendingException.class)
+    public final ResponseEntity<ExceptionResponse> handleEmailSendingException(
+            EmailSendingException e, WebRequest webRequest) {
+        return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Email Sending Error",
+                e.getMessage(), webRequest);
+    }
+
     @ExceptionHandler(InvalidJwtAuthenticationException.class)
     public final ResponseEntity<ExceptionResponse> handleInvalidJwtAuthentication(
             InvalidJwtAuthenticationException e, WebRequest webRequest) {
@@ -68,13 +81,6 @@ public class CustomEntityResponseHandler {
             org.springframework.dao.DataIntegrityViolationException e, WebRequest webRequest) {
         return buildErrorResponse(HttpStatus.CONFLICT, "Data Integrity Violation",
                 "Erro ao processar dados: registro duplicado ou dados inválidos", webRequest);
-    }
-
-    @ExceptionHandler(BadRequestException.class)
-    public final ResponseEntity<ExceptionResponse> handleBadRequest(
-            BadRequestException e, WebRequest webRequest) {
-        return buildErrorResponse(HttpStatus.BAD_REQUEST, "Bad Request",
-                e.getMessage(), webRequest);
     }
 
     @ExceptionHandler(java.io.IOException.class)

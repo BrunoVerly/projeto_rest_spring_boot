@@ -1,6 +1,7 @@
 package com.example.projetoRestSpringBoot.mail;
 
 import com.example.projetoRestSpringBoot.config.EmailConfig;
+import com.example.projetoRestSpringBoot.exception.EmailSendingException;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.AddressException;
 import jakarta.mail.internet.InternetAddress;
@@ -68,7 +69,7 @@ public class EmailSender implements Serializable {
             reset();
 
         } catch (MessagingException e) {
-            throw new RuntimeException("Error trying to send the email", e);
+            throw new EmailSendingException("Erro ao tentar enviar o e-mail: " + e.getMessage(), e);
         }
     }
 
@@ -88,7 +89,7 @@ public class EmailSender implements Serializable {
             try{
                 recipientsList.add(new InternetAddress(tok.nextElement().toString()));
             }catch (AddressException e){
-                throw new RuntimeException(e);
+                throw new EmailSendingException("Endereço de e-mail inválido: " + e.getMessage(), e);
             }
         }
         return recipientsList;
