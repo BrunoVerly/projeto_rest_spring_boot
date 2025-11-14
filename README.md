@@ -12,13 +12,13 @@
 
 Este projeto é uma **API RESTful** desenvolvida para o trabalho acadêmico da **UC – Programação de Soluções Computacionais (Faseh)**.
 
-[cite_start]O objetivo é aplicar na prática os conceitos de desenvolvimento de software, criando uma solução real para informatizar processos de pequenas e médias empresas, conforme proposto pela disciplina. [cite: 4]
+O objetivo é aplicar na prática os conceitos de desenvolvimento de software, criando uma solução real para informatizar processos de pequenas e médias empresas, conforme proposto pela disciplina. [cite: 4]
 
 ### Contexto da Solução
 
-[cite_start]O módulo de negócio escolhido foi o de **Recursos Humanos**, com foco específico na **gestão de treinamentos e controle de credenciais**. [cite: 4] [cite_start]A API centraliza e automatiza o controle de cursos corporativos, capacitações obrigatórias e suas respectivas datas de validade, garantindo conformidade e reduzindo falhas manuais. [cite: 4]
+O módulo de negócio escolhido foi o de **Recursos Humanos**, com foco específico na **gestão de treinamentos e controle de credenciais**. [cite: 4] [cite_start]A API centraliza e automatiza o controle de cursos corporativos, capacitações obrigatórias e suas respectivas datas de validade, garantindo conformidade e reduzindo falhas manuais. [cite: 4]
 
-[cite_start]A aplicação foi construída seguindo as melhores práticas de mercado, arquitetura limpa, cobertura de testes, documentação automática e suporte a múltiplos formatos de consumo de dados. [cite: 1]
+A aplicação foi construída seguindo as melhores práticas de mercado, arquitetura limpa, cobertura de testes, documentação automática e suporte a múltiplos formatos de consumo de dados. [cite: 1]
 
 ---
 
