@@ -171,6 +171,7 @@ public class TreinamentoController implements TreinamentoControllerDocs {
     }
 
         @GetMapping(value = "/exportar/{id}", produces = MediaTypes.APPLICATION_PDF_VALUE)
+        @Override
         public ResponseEntity<Resource> exportarPorId(
                 @PathVariable("id") long id
         ) {

@@ -247,4 +247,21 @@ public interface TreinamentoControllerDocs {
             @RequestParam(value = "size", defaultValue = "10") int size,
             @RequestParam(value = "direction", defaultValue = "asc") String direction
     );
+
+    @Operation(summary = "Exportar um pdf de treinamento por funcionário",
+            description = "Endpoint para exportar um relatório em pdf paginado com os treinamentos de um funcionário específico",
+            responses = {
+                    @ApiResponse(
+                            description = "Success",
+                            responseCode = "200",
+                            content =
+                            @Content(schema = @Schema(implementation = TreinamentoDTO.class))
+                    ),
+                    @ApiResponse(description = "No Content", responseCode = "204", content = @Content),
+                    @ApiResponse(description = "Bad Request", responseCode = "400", content = @Content),
+                    @ApiResponse(description = "Unauthorized", responseCode = "401", content = @Content),
+                    @ApiResponse(description = "Not Found", responseCode = "404", content = @Content),
+                    @ApiResponse(description = "Internal error", responseCode = "500", content = @Content),
+            })
+    ResponseEntity<Resource> exportarPorId(@PathVariable("id") long id);
 }
