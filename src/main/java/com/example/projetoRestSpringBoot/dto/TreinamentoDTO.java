@@ -1,6 +1,7 @@
 package com.example.projetoRestSpringBoot.dto;
 
 import com.example.projetoRestSpringBoot.enums.TreinamentoStatus;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.hateoas.RepresentationModel;
@@ -21,8 +22,11 @@ public class TreinamentoDTO extends RepresentationModel<TreinamentoDTO> implemen
     private String funcionarioMatricula;
     private Long cursoId;
     private String cursoNome;
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dataAgendamento;
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dataConcluido;
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dataVencimento;
     private String instrutor;
     private TreinamentoStatus status;

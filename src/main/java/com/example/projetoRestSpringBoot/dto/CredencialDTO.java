@@ -2,6 +2,7 @@ package com.example.projetoRestSpringBoot.dto;
 
 import com.example.projetoRestSpringBoot.enums.CredencialStatus;
 import com.example.projetoRestSpringBoot.enums.CredencialTipo;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.hateoas.RepresentationModel;
@@ -22,7 +23,9 @@ public class CredencialDTO extends RepresentationModel<CredencialDTO> implements
     private Long funcionarioId;
     private String funcionarioNome;
     private String funcionarioMatricula;
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dataEmissao;
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dataVencimento;
     private CredencialStatus status;
 

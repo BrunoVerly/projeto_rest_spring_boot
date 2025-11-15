@@ -6695,12 +6695,12 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"value": "application/xml",
+								"value": "application/json",
 								"type": "text"
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json",
+								"value": "application/xml",
 								"type": "text",
 								"disabled": true
 							},
@@ -7129,12 +7129,12 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"value": "application/xml",
+								"value": "application/json",
 								"type": "text"
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json",
+								"value": "application/xml",
 								"type": "text",
 								"disabled": true
 							},
@@ -7827,7 +7827,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "9569"
+									"value": ""
 								}
 							]
 						},
@@ -11511,6 +11511,11 @@
 							{
 								"key": "Content-Type",
 								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -11665,7 +11670,7 @@
 							"formdata": [
 								{
 									"key": "emailRequest",
-									"value": "{\"to\":\"email\", \"subject\":\"assunto\", \"body\":\"conteudo\"}",
+									"value": "{\"to\":\"email@email.com\", \"subject\":\"assunto\", \"body\":\"conteudo\"}",
 									"description": "Inserir o email, assunto e corpo do email",
 									"type": "text"
 								},
@@ -11678,7 +11683,7 @@
 							]
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/email/v1/withAttachment?emailRequest=string",
+							"raw": "{{baseUrl}}/api/email/v1/anexo?emailRequest=string",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -11686,7 +11691,7 @@
 								"api",
 								"email",
 								"v1",
-								"withAttachment"
+								"anexo"
 							],
 							"query": [
 								{
