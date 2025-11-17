@@ -1,6 +1,0 @@
-spring:
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://azuremysqlbruno.mysql.database.azure.com/projeto_rest_spring_boot?useSSL=true&requireSSL=false&serverTimezone=UTC
-    username: master
-    password: bJb%2up0vHcSE^

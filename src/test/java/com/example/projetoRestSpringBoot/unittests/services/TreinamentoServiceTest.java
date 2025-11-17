@@ -258,21 +258,29 @@ class TreinamentoServiceTest {
     @Test
     void create() {
         Treinamento treinamento = mockTreinamento.mockEntity(1);
-        Long funcionarioId = treinamento.getFuncionario().getId();
-        Long cursoId = treinamento.getCurso().getId();
+        Funcionario funcionario = treinamento.getFuncionario();
+        Curso curso = treinamento.getCurso();
 
-        when(funcionarioRepository.findById(funcionarioId)).thenReturn(Optional.of(treinamento.getFuncionario()));
-        when(cursoRepository.findById(cursoId)).thenReturn(Optional.of(treinamento.getCurso()));
+        TreinamentoDTO dto = new TreinamentoDTO();
+        dto.setFuncionarioId(funcionario.getId());
+        dto.setCursoId(curso.getId());
+        dto.setDataAgendamento(treinamento.getDataAgendamento());
+        dto.setDataConcluido(treinamento.getDataConcluido());
+        dto.setInstrutor(treinamento.getInstrutor());
+        dto.setStatus(treinamento.getStatus());
+
+        when(funcionarioRepository.findById(funcionario.getId())).thenReturn(Optional.of(funcionario));
+        when(cursoRepository.findById(curso.getId())).thenReturn(Optional.of(curso));
         when(repository.save(any(Treinamento.class))).thenReturn(treinamento);
 
-        var result = service.create(treinamento);
+        var result = service.create(dto);
 
         assertNotNull(result, "Resultado não deve ser nulo");
         assertEquals(1L, result.getId(), "ID deve ser 1");
 
-        verify(funcionarioRepository, times(1)).findById(funcionarioId);
-        verify(cursoRepository, times(1)).findById(cursoId);
-        verify(repository, times(1)).save(any(Treinamento.class)); // ← alterar de times(2) para times(1)
+        verify(funcionarioRepository, times(1)).findById(funcionario.getId());
+        verify(cursoRepository, times(1)).findById(curso.getId());
+        verify(repository, times(1)).save(any(Treinamento.class));
     }
 
     @Test
@@ -286,12 +294,15 @@ class TreinamentoServiceTest {
 
     @Test
     void createFuncionarioNotFound() {
-        Treinamento treinamento = mockTreinamento.mockEntity(1);
-        treinamento.getFuncionario().setId(999L);
+        TreinamentoDTO dto = new TreinamentoDTO();
+        dto.setFuncionarioId(999L);
+        dto.setCursoId(1L);
+        dto.setDataAgendamento(LocalDate.now());
+        dto.setInstrutor("Instrutor Teste");
 
         when(funcionarioRepository.findById(999L)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> service.create(treinamento),
+        assertThrows(ResourceNotFoundException.class, () -> service.create(dto),
                 "Deve lançar ResourceNotFoundException quando funcionário não existe");
 
         verify(funcionarioRepository, times(1)).findById(999L);
@@ -301,17 +312,19 @@ class TreinamentoServiceTest {
 
     @Test
     void createCursoNotFound() {
-        Treinamento treinamento = mockTreinamento.mockEntity(1);
-        Long funcionarioId = treinamento.getFuncionario().getId();
-        treinamento.getCurso().setId(999L);
+        TreinamentoDTO dto = new TreinamentoDTO();
+        dto.setFuncionarioId(1L);
+        dto.setCursoId(999L);
+        dto.setDataAgendamento(LocalDate.now());
+        dto.setInstrutor("Instrutor Teste");
 
-        when(funcionarioRepository.findById(funcionarioId)).thenReturn(Optional.of(treinamento.getFuncionario()));
+        when(funcionarioRepository.findById(1L)).thenReturn(Optional.of(mock(Funcionario.class)));
         when(cursoRepository.findById(999L)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> service.create(treinamento),
+        assertThrows(ResourceNotFoundException.class, () -> service.create(dto),
                 "Deve lançar ResourceNotFoundException quando curso não existe");
 
-        verify(funcionarioRepository, times(1)).findById(funcionarioId);
+        verify(funcionarioRepository, times(1)).findById(1L);
         verify(cursoRepository, times(1)).findById(999L);
         verify(repository, times(0)).save(any(Treinamento.class));
     }
@@ -401,40 +414,34 @@ class TreinamentoServiceTest {
 
     @Test
     void exportPage() throws Exception {
-        Pageable pageable = PageRequest.of(0, 12, Sort.by("dataAgendamento").ascending());
         List<Treinamento> treinamentos = List.of(mockTreinamento.mockEntity(1));
-        Page<Treinamento> page = new PageImpl<>(treinamentos, pageable, 1);
 
-        when(repository.findAll(pageable)).thenReturn(page);
+        when(repository.findAll()).thenReturn(treinamentos);
 
         FileExporter exporter = mock(FileExporter.class);
         Resource resource = mock(Resource.class);
         when(exporterFactory.getExporter("application/pdf")).thenReturn(exporter);
         when(exporter.exportTreinamentos(any(List.class))).thenReturn(resource);
 
-        var result = assertDoesNotThrow(() -> service.exportPage(pageable, "application/pdf"),
-                "Não deve lançar exceção ao exportar PDF");
+        var result = service.exportPage("application/pdf");
 
-        assertNotNull(result, "Resource não deve ser nulo");
-
-        verify(repository, times(1)).findAll(pageable);
+        assertNotNull(result, "Resultado não deve ser nulo");
+        verify(repository, times(1)).findAll();
         verify(exporterFactory, times(1)).getExporter("application/pdf");
         verify(exporter, times(1)).exportTreinamentos(any(List.class));
     }
 
     @Test
     void exportPageWithInvalidFormat() throws Exception {
-        Pageable pageable = PageRequest.of(0, 12, Sort.by("dataAgendamento").ascending());
         List<Treinamento> treinamentos = List.of(mockTreinamento.mockEntity(1));
-        Page<Treinamento> page = new PageImpl<>(treinamentos, pageable, 1);
 
-        when(repository.findAll(pageable)).thenReturn(page);
+        when(repository.findAll()).thenReturn(treinamentos);
         when(exporterFactory.getExporter("text/invalid")).thenThrow(new RuntimeException("Formato inválido"));
 
-        assertThrows(RuntimeException.class, () -> service.exportPage(pageable, "text/invalid"),
-                "Deve lançar RuntimeException para formato inválido");
+        assertThrows(RuntimeException.class, () -> service.exportPage("text/invalid"),
+                "Deve lançar RuntimeException quando formato é inválido");
 
-        verify(repository, times(1)).findAll(pageable);
+        verify(repository, times(1)).findAll();
         verify(exporterFactory, times(1)).getExporter("text/invalid");
     }
 

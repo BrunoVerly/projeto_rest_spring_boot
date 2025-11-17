@@ -184,9 +184,6 @@ public interface CursoControllerDocs {
                     @ApiResponse(description = "Internal error", responseCode = "500", content = @Content),
             })
     ResponseEntity<Resource> exportPage(
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "12") int size,
-            @RequestParam(value = "direction", defaultValue = "asc") String direction,
             HttpServletRequest request
 
     );

@@ -212,17 +212,24 @@ class CredencialServiceTest {
         funcionario.setId(credencial.getFuncionario().getId());
         credencial.setFuncionario(funcionario);
 
-        when(funcionarioRepository.findById(credencial.getFuncionario().getId())).thenReturn(Optional.of(funcionario));
+        CredencialDTO dto = new CredencialDTO();
+        dto.setTipo(credencial.getTipo());
+        dto.setFuncionarioId(funcionario.getId());
+        dto.setDataEmissao(credencial.getDataEmissao());
+        dto.setDataVencimento(credencial.getDataVencimento());
+        dto.setStatus(credencial.getStatus());
+
+        when(funcionarioRepository.findById(funcionario.getId())).thenReturn(Optional.of(funcionario));
         when(repository.save(any(Credencial.class))).thenReturn(credencial);
 
-        var result = service.create(credencial);
+        var result = service.create(dto);
 
         assertNotNull(result, "Resultado não deve ser nulo");
         assertEquals(credencial.getId(), result.getId(), "ID deve corresponder");
         assertEquals(credencial.getTipo(), result.getTipo(), "Tipo deve corresponder");
 
-        verify(funcionarioRepository, times(1)).findById(credencial.getFuncionario().getId());
-        verify(repository, times(1)).save(any(Credencial.class)); // ← alterar de times(2) para times(1)
+        verify(funcionarioRepository, times(1)).findById(funcionario.getId());
+        verify(repository, times(1)).save(any(Credencial.class));
     }
 
     @Test
@@ -235,25 +242,21 @@ class CredencialServiceTest {
 
     @Test
     void createFuncionarioNotFound() {
-        Funcionario funcionario = mock(Funcionario.class);
-        doReturn(999L).when(funcionario).getId();
-
-        Credencial credencial = new Credencial();
-        credencial.setFuncionario(funcionario);
-        credencial.setTipo(CredencialTipo.PERMANENTE);
-        credencial.setDataEmissao(LocalDate.now());
-        credencial.setDataVencimento(LocalDate.now().plusMonths(12));
-        credencial.setStatus(CredencialStatus.VALIDA);
+        CredencialDTO dto = new CredencialDTO();
+        dto.setTipo(CredencialTipo.PERMANENTE);
+        dto.setFuncionarioId(999L);
+        dto.setDataEmissao(LocalDate.now());
+        dto.setDataVencimento(LocalDate.now().plusMonths(12));
+        dto.setStatus(CredencialStatus.VALIDA);
 
         when(funcionarioRepository.findById(999L)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> service.create(credencial),
+        assertThrows(ResourceNotFoundException.class, () -> service.create(dto),
                 "Deve lançar ResourceNotFoundException quando funcionário não existe");
 
         verify(funcionarioRepository, times(1)).findById(999L);
         verify(repository, times(0)).save(any(Credencial.class));
     }
-
 
     @Test
     void update() {
@@ -348,40 +351,37 @@ class CredencialServiceTest {
 
     @Test
     void exportPage() throws Exception {
-        Pageable pageable = PageRequest.of(0, 12, Sort.by("dataEmissao").ascending());
         List<Credencial> credenciais = List.of(mockCredencial.mockEntity(1));
-        Page<Credencial> page = new PageImpl<>(credenciais, pageable, 1);
 
-        when(repository.findAll(pageable)).thenReturn(page);
+        when(repository.findAll()).thenReturn(credenciais);
 
         FileExporter exporter = mock(FileExporter.class);
         Resource resource = mock(Resource.class);
         when(exporterFactory.getExporter("application/pdf")).thenReturn(exporter);
         when(exporter.exportarCredenciais(any(List.class))).thenReturn(resource);
 
-        var result = service.exportPage(pageable, "application/pdf");
+        var result = service.exportPage("application/pdf");
 
         assertNotNull(result, "Resultado não deve ser nulo");
-        verify(repository, times(1)).findAll(pageable);
+        verify(repository, times(1)).findAll();
         verify(exporterFactory, times(1)).getExporter("application/pdf");
         verify(exporter, times(1)).exportarCredenciais(any(List.class));
     }
 
     @Test
     void exportPageWithInvalidFormat() throws Exception {
-        Pageable pageable = PageRequest.of(0, 12, Sort.by("dataEmissao").ascending());
         List<Credencial> credenciais = List.of(mockCredencial.mockEntity(1));
-        Page<Credencial> page = new PageImpl<>(credenciais, pageable, 1);
 
-        when(repository.findAll(pageable)).thenReturn(page);
+        when(repository.findAll()).thenReturn(credenciais);
         when(exporterFactory.getExporter("text/invalid")).thenThrow(new RuntimeException("Formato inválido"));
 
-        assertThrows(RuntimeException.class, () -> service.exportPage(pageable, "text/invalid"),
+        assertThrows(RuntimeException.class, () -> service.exportPage("text/invalid"),
                 "Deve lançar RuntimeException quando formato é inválido");
 
-        verify(repository, times(1)).findAll(pageable);
+        verify(repository, times(1)).findAll();
         verify(exporterFactory, times(1)).getExporter("text/invalid");
     }
+
 
     @Test
     void atualizarStatusCredenciais() {

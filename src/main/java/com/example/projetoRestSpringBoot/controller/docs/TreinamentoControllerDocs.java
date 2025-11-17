@@ -71,9 +71,6 @@ public interface TreinamentoControllerDocs {
                     @ApiResponse(description = "Internal error", responseCode = "500", content = @Content),
             })
     ResponseEntity<Resource> exportPage(
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size,
-            @RequestParam(value = "direction", defaultValue = "asc") String direction,
             HttpServletRequest request
     );
 
@@ -112,7 +109,7 @@ public interface TreinamentoControllerDocs {
                     @ApiResponse(description = "Not Found", responseCode = "404", content = @Content),
                     @ApiResponse(description = "Internal error", responseCode = "500", content = @Content),
             })
-    Treinamento create(@RequestBody Treinamento treinamento);
+    Treinamento create(@RequestBody TreinamentoDTO treinamento);
 
     @Operation(summary = "Atualizar um treinamento",
             description = "Endpoint para atualizar um treinamento especificado filtrado pelo id",

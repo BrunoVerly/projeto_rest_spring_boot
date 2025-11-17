@@ -237,15 +237,15 @@ public interface FuncionariosControllerDocs {
     List<FuncionarioDTO> importarFuncionarios(MultipartFile file);
 
     @Operation(summary = "Exportar funcionários",
-            description = "Endpoint para exportar o banco de funcionários em arquivos nos formatos CSV ou XLSX",
+            description = "Endpoint para exportar o banco de funcionários em arquivos nos formatos CSV, XLSX ou PDF",
             responses = {
                     @ApiResponse(
                             description = "Success",
                             responseCode = "200",
                             content = {
                                     @Content(mediaType = MediaTypes.APPLICATION_XLSX_VALUE),
-                                    @Content(mediaType = MediaTypes.APPLICATION_TEXT_CSV_VALUE)
-
+                                    @Content(mediaType = MediaTypes.APPLICATION_TEXT_CSV_VALUE),
+                                    @Content(mediaType = MediaTypes.APPLICATION_PDF_VALUE)
                             }),
                     @ApiResponse(description = "No Content", responseCode = "204", content = @Content),
                     @ApiResponse(description = "Bad Request", responseCode = "400", content = @Content),
@@ -253,11 +253,5 @@ public interface FuncionariosControllerDocs {
                     @ApiResponse(description = "Not Found", responseCode = "404", content = @Content),
                     @ApiResponse(description = "Internal error", responseCode = "500", content = @Content),
             })
-    ResponseEntity<Resource> exportPage(
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "12") int size,
-            @RequestParam(value = "direction", defaultValue = "asc") String direction,
-            HttpServletRequest request
-
-    );
+    ResponseEntity<Resource> exportPage(HttpServletRequest request);
 }

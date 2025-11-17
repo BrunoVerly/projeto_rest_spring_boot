@@ -30,6 +30,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.example.projetoRestSpringBoot.mapper.ObjectMapper.parseObject;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -131,37 +132,37 @@ public class CredencialService {
         }
     }
 
-    public Credencial create(Credencial credencial) {
-        if (credencial == null) {
+    public Credencial create(CredencialDTO credencialDTO) {
+        if (credencialDTO == null) {
             throw new RequiredObjectIsNullException();
         }
-        if (credencial.getFuncionario() == null || credencial.getFuncionario().getId() == null) {
+        if (credencialDTO.getFuncionarioId() == null) {
             throw new BadRequestException("Funcionário é obrigatório");
         }
-        if (credencial.getTipo() == null) {
+        if (credencialDTO.getTipo() == null) {
             throw new BadRequestException("Tipo da credencial é obrigatório");
         }
-        if (credencial.getDataEmissao() == null) {
+        if (credencialDTO.getDataEmissao() == null) {
             throw new BadRequestException("Data de emissão é obrigatória");
         }
-        if (credencial.getDataVencimento() == null) {
+        if (credencialDTO.getDataVencimento() == null) {
             throw new BadRequestException("Data de vencimento é obrigatória");
         }
-        if (credencial.getDataVencimento().isBefore(credencial.getDataEmissao())) {
+        if (credencialDTO.getDataVencimento().isBefore(credencialDTO.getDataEmissao())) {
             throw new BadRequestException("Data de vencimento não pode ser anterior à data de emissão");
         }
 
         try {
             logger.info("Criando uma nova credencial no banco");
-            Funcionario funcionario = funcionarioRepository.findById(credencial.getFuncionario().getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Funcionário não encontrado para o ID: " + credencial.getFuncionario().getId()));
+            Funcionario funcionario = funcionarioRepository.findById(credencialDTO.getFuncionarioId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Funcionário não encontrado para o ID: " + credencialDTO.getFuncionarioId()));
 
             Credencial entity = new Credencial();
-            entity.setTipo(credencial.getTipo());
+            entity.setTipo(credencialDTO.getTipo());
             entity.setFuncionario(funcionario);
-            entity.setDataEmissao(credencial.getDataEmissao());
-            entity.setDataVencimento(credencial.getDataVencimento());
-            entity.setStatus(credencial.getStatus() != null ? credencial.getStatus() : calcularStatus(credencial.getDataVencimento()));
+            entity.setDataEmissao(credencialDTO.getDataEmissao());
+            entity.setDataVencimento(credencialDTO.getDataVencimento());
+            entity.setStatus(credencialDTO.getStatus() != null ? credencialDTO.getStatus() : calcularStatus(credencialDTO.getDataVencimento()));
 
             var savedEntity = repository.save(entity);
             logger.info("Credencial criada com sucesso: ID {}", savedEntity.getId());
@@ -177,6 +178,7 @@ public class CredencialService {
             throw new RuntimeException("Erro ao criar credencial: " + e.getMessage());
         }
     }
+
 
     public CredencialDTO update(CredencialDTO credencial) {
         if (credencial == null) {
@@ -419,26 +421,15 @@ public class CredencialService {
         }
     }
 
-    public Resource exportPage(Pageable pageable, String acceptHeader) {
-        if (pageable == null) {
-            throw new BadRequestException("Parâmetros de paginação não podem ser nulos");
-        }
-        if (pageable.getPageNumber() < 0 || pageable.getPageSize() <= 0) {
-            throw new BadRequestException("Parâmetros de paginação inválidos: page >= 0 e size > 0");
-        }
+    public Resource exportPage(String acceptHeader) {
         if (acceptHeader == null || acceptHeader.trim().isEmpty()) {
             throw new BadRequestException("Header Accept é obrigatório");
         }
 
         try {
-            logger.info("Exportando a tabela de credenciais no formato: {}", acceptHeader);
-            var page = repository.findAll(pageable);
+            logger.info("Exportando credenciais no formato: {}", acceptHeader);
 
-            if (page.isEmpty()) {
-                throw new ResourceNotFoundException("Nenhuma credencial encontrada para exportação");
-            }
-
-            var credenciais = page.stream()
+            var credenciais = repository.findAll().stream()
                     .map(credencial -> {
                         CredencialDTO dto = parseObject(credencial, CredencialDTO.class);
 
@@ -450,7 +441,11 @@ public class CredencialService {
 
                         return dto;
                     })
-                    .toList();
+                    .collect(Collectors.toList());
+
+            if (credenciais.isEmpty()) {
+                throw new ResourceNotFoundException("Nenhuma credencial encontrada para exportar");
+            }
 
             FileExporter exporter = this.exporter.getExporter(acceptHeader);
             var resource = exporter.exportarCredenciais(credenciais);
@@ -467,6 +462,7 @@ public class CredencialService {
             throw new FileStorageException("Erro ao exportar o arquivo: " + e.getMessage(), e);
         }
     }
+
 
     @Scheduled(cron = "0 0 0 * * ?")
     public void atualizarStatusCredenciais() {

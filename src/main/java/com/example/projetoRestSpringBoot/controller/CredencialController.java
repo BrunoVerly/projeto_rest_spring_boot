@@ -58,7 +58,7 @@ public class CredencialController implements CredencialControllerDocs {
                     MediaType.APPLICATION_XML_VALUE,
                     MediaType.APPLICATION_YAML_VALUE})
     @Override
-    public Credencial create (@RequestBody Credencial credencial) {
+    public Credencial create (@RequestBody CredencialDTO credencial) {
         return service.create(credencial);
     }
 
@@ -134,19 +134,13 @@ public class CredencialController implements CredencialControllerDocs {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping(value = "/exportar")
-    public ResponseEntity<Resource> exportPage(
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size,
-            @RequestParam(value = "direction", defaultValue = "asc") String direction,
-            HttpServletRequest request
-    ){
-        var sortDirection = "desc".equalsIgnoreCase(direction) ? Direction.DESC : Direction.ASC;
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, "dataVencimento"));
-
+    @GetMapping(value = "/exportar", produces = {
+            MediaTypes.APPLICATION_XLSX_VALUE,
+            MediaTypes.APPLICATION_TEXT_CSV_VALUE,
+            MediaTypes.APPLICATION_PDF_VALUE})
+    public ResponseEntity<Resource> exportPage(HttpServletRequest request) {
         String acceptHeader = request.getHeader(HttpHeaders.ACCEPT);
-
-        Resource file = service.exportPage(pageable, acceptHeader);
+        Resource file = service.exportPage(acceptHeader);
 
         var contentType = acceptHeader != null ? acceptHeader : "application/octet-stream";
         var fileExtension = MediaTypes.APPLICATION_TEXT_CSV_VALUE.equalsIgnoreCase(acceptHeader) ? ".csv" :

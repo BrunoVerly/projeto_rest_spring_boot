@@ -123,9 +123,6 @@ public interface CredencialControllerDocs {
                     @ApiResponse(description = "Internal error", responseCode = "500", content = @Content),
             })
     ResponseEntity<Resource> exportPage(
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "12") int size,
-            @RequestParam(value = "direction", defaultValue = "asc") String direction,
             HttpServletRequest request
 
     );
@@ -164,7 +161,7 @@ public interface CredencialControllerDocs {
                     @ApiResponse(description = "Not Found", responseCode = "404", content = @Content),
                     @ApiResponse(description = "Internal error", responseCode = "500", content = @Content),
             })
-    Credencial create(@RequestBody Credencial credencial);
+    Credencial create(@RequestBody CredencialDTO credencial);
 
     @Operation(summary = "Atualizar uma credencial",
             description = "Endpoint para atualizar uma credencial especificada filtrada pelo id",

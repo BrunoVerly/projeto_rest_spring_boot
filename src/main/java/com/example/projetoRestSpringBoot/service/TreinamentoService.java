@@ -33,6 +33,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.example.projetoRestSpringBoot.mapper.ObjectMapper.parseObject;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -405,43 +406,43 @@ public class TreinamentoService {
         }
     }
 
-    public Treinamento create(Treinamento treinamento) {
-        if (treinamento == null) {
+    public Treinamento create(TreinamentoDTO treinamentoDTO) {
+        if (treinamentoDTO == null) {
             throw new RequiredObjectIsNullException();
         }
-        if (treinamento.getFuncionario() == null || treinamento.getFuncionario().getId() == null) {
+        if (treinamentoDTO.getFuncionarioId() == null) {
             throw new BadRequestException("Funcionário é obrigatório");
         }
-        if (treinamento.getCurso() == null || treinamento.getCurso().getId() == null) {
+        if (treinamentoDTO.getCursoId() == null) {
             throw new BadRequestException("Curso é obrigatório");
         }
-        if (treinamento.getDataAgendamento() == null) {
+        if (treinamentoDTO.getDataAgendamento() == null) {
             throw new BadRequestException("Data de agendamento é obrigatória");
         }
-        if (treinamento.getInstrutor() == null || treinamento.getInstrutor().trim().isEmpty()) {
+        if (treinamentoDTO.getInstrutor() == null || treinamentoDTO.getInstrutor().trim().isEmpty()) {
             throw new BadRequestException("Instrutor é obrigatório");
         }
 
         try {
             logger.info("Criando um novo registro de treinamento no banco");
-            Funcionario funcionario = funcionarioRepository.findById(treinamento.getFuncionario().getId())
+            Funcionario funcionario = funcionarioRepository.findById(treinamentoDTO.getFuncionarioId())
                     .orElseThrow(() -> new ResourceNotFoundException("Funcionário não encontrado"));
 
-            Curso curso = cursoRepository.findById(treinamento.getCurso().getId())
+            Curso curso = cursoRepository.findById(treinamentoDTO.getCursoId())
                     .orElseThrow(() -> new ResourceNotFoundException("Curso não encontrado"));
 
             Treinamento entity = new Treinamento();
             entity.setFuncionario(funcionario);
             entity.setCurso(curso);
-            entity.setDataAgendamento(treinamento.getDataAgendamento());
-            entity.setDataConcluido(treinamento.getDataConcluido());
+            entity.setDataAgendamento(treinamentoDTO.getDataAgendamento());
+            entity.setDataConcluido(treinamentoDTO.getDataConcluido());
 
-            if (treinamento.getDataConcluido() != null) {
-                entity.setDataVencimento(treinamento.getDataConcluido().plusMonths(curso.getValidadeMeses()));
+            if (treinamentoDTO.getDataConcluido() != null) {
+                entity.setDataVencimento(treinamentoDTO.getDataConcluido().plusMonths(curso.getValidadeMeses()));
             }
 
-            entity.setInstrutor(treinamento.getInstrutor());
-            entity.setStatus(treinamento.getStatus() != null ? treinamento.getStatus() : TreinamentoStatus.VALIDO);
+            entity.setInstrutor(treinamentoDTO.getInstrutor());
+            entity.setStatus(treinamentoDTO.getStatus() != null ? treinamentoDTO.getStatus() : TreinamentoStatus.VALIDO);
             var savedEntity = repository.save(entity);
             logger.info("Treinamento criado com sucesso: ID {}", savedEntity.getId());
             return savedEntity;
@@ -456,6 +457,7 @@ public class TreinamentoService {
             throw new RuntimeException("Erro ao criar treinamento: " + e.getMessage());
         }
     }
+
 
     public TreinamentoDTO update(TreinamentoDTO treinamentoDTO) {
         if (treinamentoDTO == null) {
@@ -496,9 +498,6 @@ public class TreinamentoService {
         } catch (BadRequestException | ResourceNotFoundException | RequiredObjectIsNullException e) {
             logger.warn("Erro de validação ao atualizar treinamento: {}", e.getMessage());
             throw e;
-        } catch (org.springframework.dao.DataIntegrityViolationException e) {
-            logger.error("Erro de integridade ao atualizar treinamento: {}", e.getMessage(), e);
-            throw new BadRequestException("Erro ao atualizar: dados duplicados ou inválidos");
         } catch (Exception e) {
             logger.error("Erro inesperado ao atualizar treinamento: {}", e.getMessage(), e);
             throw new RuntimeException("Erro ao atualizar treinamento: " + e.getMessage());
@@ -528,20 +527,15 @@ public class TreinamentoService {
         }
     }
 
-    public Resource exportPage(Pageable pageable, String acceptHeader) {
-        if (pageable == null) {
-            throw new BadRequestException("Parâmetros de paginação não podem ser nulos");
-        }
-        if (pageable.getPageNumber() < 0 || pageable.getPageSize() <= 0) {
-            throw new BadRequestException("Parâmetros de paginação inválidos: page >= 0 e size > 0");
-        }
+    public Resource exportPage(String acceptHeader) {
         if (acceptHeader == null || acceptHeader.trim().isEmpty()) {
             throw new BadRequestException("Header Accept é obrigatório");
         }
 
         try {
-            logger.info("Exportando a tabela de treinamentos no formato: {}", acceptHeader);
-            var treinamentos = repository.findAll(pageable)
+            logger.info("Exportando treinamentos no formato: {}", acceptHeader);
+
+            var treinamentos = repository.findAll().stream()
                     .map(treinamento -> {
                         TreinamentoDTO dto = parseObject(treinamento, TreinamentoDTO.class);
 
@@ -558,7 +552,7 @@ public class TreinamentoService {
 
                         return dto;
                     })
-                    .getContent();
+                    .collect(Collectors.toList());
 
             if (treinamentos.isEmpty()) {
                 throw new ResourceNotFoundException("Nenhum treinamento encontrado para exportar");
@@ -579,6 +573,7 @@ public class TreinamentoService {
             throw new FileStorageException("Erro ao exportar o arquivo: " + e.getMessage(), e);
         }
     }
+
 
     public Resource exportarPorId(long id) {
         if (id <= 0) {

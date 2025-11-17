@@ -333,38 +333,34 @@ class FuncionarioServiceTest {
 
     @Test
     void exportPage() throws Exception {
-        Pageable pageable = PageRequest.of(0, 12, Sort.by("nome").ascending());
         List<Funcionario> funcionarios = List.of(mockFuncionario.mockEntity(1));
-        Page<Funcionario> page = new PageImpl<>(funcionarios, pageable, 1);
 
-        when(repository.findAll(pageable)).thenReturn(page);
+        when(repository.findAll()).thenReturn(funcionarios);
 
         FileExporter exporter = mock(FileExporter.class);
         Resource resource = mock(Resource.class);
         when(exporterFactory.getExporter("application/pdf")).thenReturn(exporter);
         when(exporter.exportarFuncionarios(any(List.class))).thenReturn(resource);
 
-        var result = service.exportPage(pageable, "application/pdf");
+        var result = service.exportPage("application/pdf");
 
         assertNotNull(result, "Resultado não deve ser nulo");
-        verify(repository, times(1)).findAll(pageable);
+        verify(repository, times(1)).findAll();
         verify(exporterFactory, times(1)).getExporter("application/pdf");
         verify(exporter, times(1)).exportarFuncionarios(any(List.class));
     }
 
     @Test
     void exportPageWithInvalidFormat() throws Exception {
-        Pageable pageable = PageRequest.of(0, 12, Sort.by("nome").ascending());
         List<Funcionario> funcionarios = List.of(mockFuncionario.mockEntity(1));
-        Page<Funcionario> page = new PageImpl<>(funcionarios, pageable, 1);
 
-        when(repository.findAll(pageable)).thenReturn(page);
+        when(repository.findAll()).thenReturn(funcionarios);
         when(exporterFactory.getExporter("text/invalid")).thenThrow(new RuntimeException("Formato inválido"));
 
-        assertThrows(RuntimeException.class, () -> service.exportPage(pageable, "text/invalid"),
+        assertThrows(RuntimeException.class, () -> service.exportPage("text/invalid"),
                 "Deve lançar RuntimeException quando formato é inválido");
 
-        verify(repository, times(1)).findAll(pageable);
+        verify(repository, times(1)).findAll();
         verify(exporterFactory, times(1)).getExporter("text/invalid");
     }
 }

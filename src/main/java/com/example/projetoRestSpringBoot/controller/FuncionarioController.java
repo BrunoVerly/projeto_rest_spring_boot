@@ -161,21 +161,9 @@ public class FuncionarioController implements FuncionariosControllerDocs {
             MediaTypes.APPLICATION_XLSX_VALUE,
             MediaTypes.APPLICATION_TEXT_CSV_VALUE,
             MediaTypes.APPLICATION_PDF_VALUE})
-    public ResponseEntity<Resource> exportPage(
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size,
-            @RequestParam(value = "direction", defaultValue = "asc") String direction,
-            HttpServletRequest request
-    ){
-        if (page < 0 || size <= 0) {
-            throw new BadRequestException("Parâmetros de paginação inválidos: page >= 0 e size > 0");
-        }
-
-        var sortDirection = "desc".equalsIgnoreCase(direction) ? Direction.DESC : Direction.ASC;
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, "nome"));
-
+    public ResponseEntity<Resource> exportPage(HttpServletRequest request) {
         String acceptHeader = request.getHeader(HttpHeaders.ACCEPT);
-        Resource file = service.exportPage(pageable, acceptHeader);
+        Resource file = service.exportPage(acceptHeader);
 
         var contentType = acceptHeader != null ? acceptHeader : "application/octet-stream";
         var fileExtension = MediaTypes.APPLICATION_TEXT_CSV_VALUE.equalsIgnoreCase(acceptHeader) ? ".csv" :

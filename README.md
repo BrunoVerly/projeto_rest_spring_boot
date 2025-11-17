@@ -178,3 +178,9 @@ Para se autenticar (via Postman, Swagger ou Demo Online), utilize:
 
 * **Username:** `leandro`
 * **Password:** `admin123`
+
+
+### 5. Vídeo de Demonstração dos Endpoints
+Link para o video no Google Drive demonstrando o uso dos endpoints da API:
+
+    https://drive.google.com/file/d/1fg6oIw9ceIoTSgwyH0a73T3x6GwVOLth/view?usp=sharing

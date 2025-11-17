@@ -65,7 +65,7 @@ public class TreinamentoController implements TreinamentoControllerDocs {
         return ResponseEntity.ok(service.findByStatus(status, pageable));
     }
 
-    @GetMapping(value="/buscarPorInstrutor",
+    @PostMapping(value="/buscarPorInstrutor",
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_YAML_VALUE},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_YAML_VALUE})
     public ResponseEntity<PagedModel<EntityModel<TreinamentoDTO>>> findByInstrutor(
@@ -116,7 +116,7 @@ public class TreinamentoController implements TreinamentoControllerDocs {
                     MediaType.APPLICATION_XML_VALUE,
                     MediaType.APPLICATION_YAML_VALUE})
     @Override
-    public Treinamento create (@RequestBody Treinamento treinamento) {
+    public Treinamento create (@RequestBody TreinamentoDTO treinamento) {
         return service.create(treinamento);
     }
 
@@ -144,19 +144,9 @@ public class TreinamentoController implements TreinamentoControllerDocs {
             MediaTypes.APPLICATION_XLSX_VALUE,
             MediaTypes.APPLICATION_TEXT_CSV_VALUE,
             MediaTypes.APPLICATION_PDF_VALUE})
-    @Override
-    public ResponseEntity<Resource> exportPage(
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size,
-            @RequestParam(value = "direction", defaultValue = "asc") String direction,
-            HttpServletRequest request
-    ){
-        var sortDirection = "desc".equalsIgnoreCase(direction) ? Direction.DESC : Direction.ASC;
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, "dataVencimento"));
-
+    public ResponseEntity<Resource> exportPage(HttpServletRequest request) {
         String acceptHeader = request.getHeader(HttpHeaders.ACCEPT);
-
-        Resource file = service.exportPage(pageable, acceptHeader);
+        Resource file = service.exportPage(acceptHeader);
 
         var contentType = acceptHeader != null ? acceptHeader : "application/octet-stream";
         var fileExtension = MediaTypes.APPLICATION_TEXT_CSV_VALUE.equalsIgnoreCase(acceptHeader) ? ".csv" :
@@ -170,7 +160,8 @@ public class TreinamentoController implements TreinamentoControllerDocs {
                 .body(file);
     }
 
-        @GetMapping(value = "/exportar/{id}", produces = MediaTypes.APPLICATION_PDF_VALUE)
+
+    @GetMapping(value = "/exportar/{id}", produces = MediaTypes.APPLICATION_PDF_VALUE)
         @Override
         public ResponseEntity<Resource> exportarPorId(
                 @PathVariable("id") long id

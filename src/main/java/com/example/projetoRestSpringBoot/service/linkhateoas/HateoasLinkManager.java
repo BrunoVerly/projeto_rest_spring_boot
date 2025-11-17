@@ -30,7 +30,7 @@ public final class HateoasLinkManager {
     public static void addCursoListPageLinks(PagedModel<EntityModel<CursoDTO>> model) {
         model.add(linkTo(methodOn(CursoController.class).create(null)).withRel("create").withType("POST"));
         model.add(linkTo(methodOn(CursoController.class).importarCursos(null)).withRel("importar").withType("POST"));
-        model.add(linkTo(methodOn(CursoController.class).exportPage(0, 12, "asc", null)).withRel("exportPage").withType("GET"));
+        model.add(linkTo(methodOn(CursoController.class).exportPage( null)).withRel("exportPage").withType("GET"));
     }
 
     // ============ FUNCIONÁRIO LINKS ============
@@ -45,7 +45,7 @@ public final class HateoasLinkManager {
     public static void addFuncionarioListPageLinks(PagedModel<EntityModel<FuncionarioDTO>> model) {
         model.add(linkTo(methodOn(FuncionarioController.class).create(null)).withRel("create").withType("POST"));
         model.add(linkTo(methodOn(FuncionarioController.class).importarFuncionarios(null)).withRel("importar").withType("POST"));
-        model.add(linkTo(methodOn(FuncionarioController.class).exportPage(0, 12, "asc", null)).withRel("exportPage").withType("GET"));
+        model.add(linkTo(methodOn(FuncionarioController.class).exportPage(null)).withRel("exportPage").withType("GET"));
     }
 
     // ============ TREINAMENTO LINKS ============
@@ -58,7 +58,7 @@ public final class HateoasLinkManager {
 
     public static void addTreinamentoListPageLinks(PagedModel<EntityModel<TreinamentoDTO>> model) {
         model.add(linkTo(methodOn(TreinamentoController.class).create(null)).withRel("create").withType("POST"));
-        model.add(linkTo(methodOn(TreinamentoController.class).exportPage(0, 12, "asc", null)).withRel("exportPage").withType("GET"));
+        model.add(linkTo(methodOn(TreinamentoController.class).exportPage( null)).withRel("exportPage").withType("GET"));
     }
 
     // ============ CREDENCIAL LINKS ============
@@ -72,7 +72,7 @@ public final class HateoasLinkManager {
 
     public static void addCredencialListPageLinks(PagedModel<EntityModel<CredencialDTO>> model) {
         model.add(linkTo(methodOn(CredencialController.class).create(null)).withRel("create").withType("POST"));
-        model.add(linkTo(methodOn(CredencialController.class).exportPage(0, 12, "asc", null)).withRel("exportPage").withType("GET"));
+        model.add(linkTo(methodOn(CredencialController.class).exportPage(null)).withRel("exportPage").withType("GET"));
     }
 
 }

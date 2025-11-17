@@ -216,18 +216,17 @@ class CursoServiceTest {
 
     @Test
     void exportPage() throws Exception {
-        Pageable pageable = PageRequest.of(0, 12, Sort.by("nome").ascending());
         List<Curso> cursos = List.of(mockCurso.mockEntity(1));
-        Page<Curso> page = new PageImpl<>(cursos, pageable, 1);
 
-        when(repository.findAll(pageable)).thenReturn(page);
+        when(repository.findAll()).thenReturn(cursos);
 
         FileExporter exporter = mock(FileExporter.class);
         Resource resource = mock(Resource.class);
         when(exporterFactory.getExporter("application/pdf")).thenReturn(exporter);
         when(exporter.exportCursos(any(List.class))).thenReturn(resource);
 
-        var result = assertDoesNotThrow(() -> service.exportPage(pageable, "application/pdf"));
+        var result = service.exportPage("application/pdf");
+
         assertNotNull(result);
     }
 

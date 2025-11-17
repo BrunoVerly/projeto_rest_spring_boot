@@ -31,6 +31,8 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
+
 import static com.example.projetoRestSpringBoot.mapper.ObjectMapper.parseObject;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
@@ -247,25 +249,20 @@ public class CursoService {
         }
     }
 
-    public Resource exportPage(Pageable pageable, String acceptHeader) {
-        if (pageable == null) {
-            throw new BadRequestException("Parâmetros de paginação não podem ser nulos");
-        }
-        if (pageable.getPageNumber() < 0 || pageable.getPageSize() <= 0) {
-            throw new BadRequestException("Parâmetros de paginação inválidos: page >= 0 e size > 0");
-        }
+    public Resource exportPage(String acceptHeader) {
         if (acceptHeader == null || acceptHeader.trim().isEmpty()) {
             throw new BadRequestException("Header Accept é obrigatório");
         }
 
         try {
-            logger.info("Exportando a tabela de cursos no formato: {}", acceptHeader);
-            var cursos = repository.findAll(pageable)
+            logger.info("Exportando cursos no formato: {}", acceptHeader);
+
+            var cursos = repository.findAll().stream()
                     .map(curso -> parseObject(curso, CursoDTO.class))
-                    .getContent();
+                    .collect(Collectors.toList());
 
             if (cursos.isEmpty()) {
-                throw new ResourceNotFoundException("Nenhum curso encontrado para exportação");
+                throw new ResourceNotFoundException("Nenhum curso encontrado para exportar");
             }
 
             FileExporter exporter = this.exporter.getExporter(acceptHeader);

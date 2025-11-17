@@ -1395,6 +1395,9 @@
 				},
 				{
 					"name": "Exportar funcionários",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
 					"request": {
 						"method": "GET",
 						"header": [
@@ -1418,32 +1421,16 @@
 								"disabled": true
 							}
 						],
-						"url": {
-							"raw": "{{baseUrl}}/api/funcionario/v1/exportar?page=0&size=10&direction=asc",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"funcionario",
-								"v1",
-								"exportar"
-							],
-							"query": [
-								{
-									"key": "page",
-									"value": "0"
-								},
-								{
-									"key": "size",
-									"value": "10"
-								},
-								{
-									"key": "direction",
-									"value": "asc"
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
 								}
-							]
+							}
 						},
+						"url": "{{baseUrl}}/api/funcionario/v1/exportar",
 						"description": "Endpoint para exportar o banco de funcionários em arquivos nos formatos CSV ou XLSX"
 					},
 					"response": [
@@ -3326,7 +3313,24 @@
 								"type": "text"
 							}
 						],
-						"url": "{{baseUrl}}/api/curso/v1/1",
+						"url": {
+							"raw": "{{baseUrl}}/api/curso/v1/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"curso",
+								"v1",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						},
 						"description": "Endpoint para retornar um curso especifico filtrado pelo id"
 					},
 					"response": [
@@ -4169,32 +4173,7 @@
 								"disabled": true
 							}
 						],
-						"url": {
-							"raw": "{{baseUrl}}/api/curso/v1/exportar?page=0&size=10&direction=asc",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"curso",
-								"v1",
-								"exportar"
-							],
-							"query": [
-								{
-									"key": "page",
-									"value": "0"
-								},
-								{
-									"key": "size",
-									"value": "10"
-								},
-								{
-									"key": "direction",
-									"value": "asc"
-								}
-							]
-						},
+						"url": "{{baseUrl}}/api/curso/v1/exportar",
 						"description": "Endpoint para exportar o banco de cursos em arquivos nos formatos CSV ou XLSX"
 					},
 					"response": [
@@ -6225,32 +6204,7 @@
 								"disabled": true
 							}
 						],
-						"url": {
-							"raw": "{{baseUrl}}/api/credencial/v1/exportar?page=0&size=10&direction=asc",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"credencial",
-								"v1",
-								"exportar"
-							],
-							"query": [
-								{
-									"key": "page",
-									"value": "0"
-								},
-								{
-									"key": "size",
-									"value": "10"
-								},
-								{
-									"key": "direction",
-									"value": "asc"
-								}
-							]
-						},
+						"url": "{{baseUrl}}/api/credencial/v1/exportar",
 						"description": "Endpoint para exportar o banco de credenciais em arquivos nos formatos CSV ou XLSX"
 					},
 					"response": [
@@ -6484,7 +6438,7 @@
 								"disabled": true
 							},
 							{
-								"key": "Accept",
+								"key": "Authorization",
 								"value": "Bearer {{accessToken}}",
 								"type": "text"
 							}
@@ -9218,7 +9172,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/treinamento/v1/exportar/3",
+							"raw": "{{baseUrl}}/api/treinamento/v1/exportar/:id_funcionario",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -9227,7 +9181,7 @@
 								"treinamento",
 								"v1",
 								"exportar",
-								"3"
+								":id_funcionario"
 							],
 							"query": [
 								{
@@ -9244,6 +9198,12 @@
 									"key": "direction",
 									"value": "asc",
 									"disabled": true
+								}
+							],
+							"variable": [
+								{
+									"key": "id_funcionario",
+									"value": ""
 								}
 							]
 						},
@@ -9535,7 +9495,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"funcionarioId\": 2,\n  \"cursoId\": 3,\n  \"dataAgendamento\": \"yyyy-MM-dd\",\n  \"dataConcluido\": \"yyyy-MM-dd\",\n  \"instrutor\": \"String\",\n  \"status\": \"VALIDO, VENCIMENTO_PROXIMO, VENCIDO\"\n}",
+							"raw": "{\n  \"funcionarioId\":1,\n  \"cursoId\":3,\n  \"dataAgendamento\": \"yyyy-MM-dd\",\n  \"dataConcluido\": \"yyyy-MM-dd\",\n  \"instrutor\": \"String\",\n  \"status\": \"VALIDO, VENCIMENTO_PROXIMO, VENCIDO\"\n}",
 							"options": {
 								"raw": {
 									"headerFamily": "json",
@@ -9739,12 +9699,12 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"value": "application/xml",
+								"value": "application/json",
 								"type": "text"
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json",
+								"value": "application/xml",
 								"type": "text",
 								"disabled": true
 							},
@@ -12437,8 +12397,7 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"disabled": true
+								"value": "application/json"
 							},
 							{
 								"key": "Content-Type",
@@ -12474,14 +12433,23 @@
 								"type": "text"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
-							"raw": "{{baseUrl}}/auth/autalizar/:usuario",
+							"raw": "{{baseUrl}}/auth/atualizar/:usuario",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"auth",
-								"autalizar",
+								"atualizar",
 								":usuario"
 							],
 							"variable": [
