@@ -18,7 +18,6 @@ services:
       timeout: 5s
       retries: 5
     command: --max-connections=1000 --default-authentication-plugin=mysql_native_password
-
   projeto_rest_spring_boot:
     build: .
     image: brunoverly/projeto_rest_spring_boot
@@ -44,7 +43,6 @@ services:
       timeout: 10s
       retries: 5
       start_period: 60s
-
 networks:
   mynetwork:
     driver: bridge

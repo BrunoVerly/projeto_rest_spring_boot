@@ -9,7 +9,6 @@ security:
     token:
       secret-key: 53cr3t7
       expire-length: 3600000
-
 email:
   subject: "Default Subject"
   message: "Default Message"
@@ -53,11 +52,9 @@ spring:
       file-size-threshold: 2KB
       max-file-size: 200MB
       max-request-size: 200MB
-
 logging:
   level:
     root: INFO
-
 spring-doc:
   paths-to-match: /api/**/v1/**,/auth/**
   swagger-ui:
