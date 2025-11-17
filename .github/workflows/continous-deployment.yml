@@ -24,8 +24,8 @@ jobs:
           java-version: '21'
           cache: maven
 
-      - name: Build Application .jar (skip tests)
-        run: mvn clean package -DskipTests
+      - name: Build Application .jar
+        run: mvn clean package
 
       - name: Docker Compose Build
         run: docker compose build
