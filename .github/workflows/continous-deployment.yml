@@ -1,9 +1,3 @@
-name: CI CD com GitHub Actions
-
-on:
-  push:
-    branches: [ "master" ]
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -24,12 +18,22 @@ jobs:
           java-version: '21'
           cache: maven
 
-      - name: Build Application .jar
-        run: mvn clean package
-
+      # Build Docker images
       - name: Docker Compose Build
         run: docker compose build
 
+      # Subir containers para testes de integração
+      - name: Start Services
+        run: |
+          docker compose up -d
+          # Espera o DB ficar saudável
+          docker compose exec db sh -c "until mysqladmin ping -u docker -padmin123 --silent; do sleep 2; done"
+
+      # Rodar os testes
+      - name: Run Integration Tests
+        run: mvn clean test -Dspring.profiles.active=docker
+
+      # Build e push da aplicação
       - name: Push Docker Images
         run: |
           docker tag ${{ secrets.DOCKER_USERNAME }}/projeto_rest_spring_boot:latest ${{ secrets.DOCKER_USERNAME }}/projeto_rest_spring_boot:${{ github.run_id }}
